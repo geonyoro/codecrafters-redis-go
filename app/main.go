@@ -36,6 +36,14 @@ func handleConn(conn net.Conn) {
 		if err != nil || readSize == 0 {
 			break
 		}
+		command, err := ParseInput(string(buffer))
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		ExecuteCommand(conn, command)
+
 		conn.Write([]byte("+PONG\r\n"))
 	}
 }
