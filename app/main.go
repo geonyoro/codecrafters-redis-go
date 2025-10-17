@@ -44,6 +44,5 @@ func handleConn(conn net.Conn) {
 
 		ExecuteCommand(conn, command)
 
-		conn.Write([]byte("+PONG\r\n"))
 	}
 }
