@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -13,7 +12,6 @@ type Command struct {
 
 func ParseInput(input string) (Command, error) {
 	parts := strings.Split(input, "\r\n")
-	fmt.Printf("%+v\n", parts)
 	argCountString := parts[0]
 	argCountString = strings.TrimLeft(argCountString, "*")
 	argCount, _ := strconv.Atoi(argCountString)
