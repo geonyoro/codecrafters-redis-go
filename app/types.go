@@ -8,14 +8,25 @@ type Variable struct {
 	ExpiryMilliseconds int64
 }
 
-type Context struct {
-	Conn        net.Conn
-	VariableMap *map[string]Variable
+type ListVariable struct {
+	Values []string
 }
 
-func NewContext(conn net.Conn, variableMap *map[string]Variable) *Context {
-	return &Context{
-		conn,
-		variableMap,
+type Context struct {
+	Conn  net.Conn
+	State *State
+}
+
+type State struct {
+	VariableMap *map[string]Variable
+	ListMap     *map[string]ListVariable
+}
+
+func NewState() *State {
+	vMap := make(map[string]Variable)
+	lMap := make(map[string]ListVariable)
+	return &State{
+		VariableMap: &vMap,
+		ListMap:     &lMap,
 	}
 }

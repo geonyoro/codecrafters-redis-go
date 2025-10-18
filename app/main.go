@@ -7,11 +7,11 @@ import (
 	"os"
 )
 
-var VariableMap = make(map[string]Variable)
-
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
+
+	globalState := NewState()
 
 	l, err := net.Listen("tcp4", "0.0.0.0:6379")
 	if err != nil {
@@ -26,11 +26,11 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			continue
 		}
-		go handleConn(conn)
+		go handleConn(conn, globalState)
 	}
 }
 
-func handleConn(conn net.Conn) {
+func handleConn(conn net.Conn, globalState *State) {
 	defer conn.Close()
 
 	for {
@@ -44,7 +44,10 @@ func handleConn(conn net.Conn) {
 			fmt.Println(err)
 			continue
 		}
-		ctx := NewContext(conn, &VariableMap)
-		ExecuteCommand(ctx, command)
+		ctx := Context{
+			Conn:  conn,
+			State: globalState,
+		}
+		ExecuteCommand(&ctx, command)
 	}
 }

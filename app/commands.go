@@ -8,7 +8,7 @@ import (
 )
 
 func ExecuteCommand(ctx *Context, cmd Command) bool {
-	cmdFunc, ok := CmdFuncMap[cmd.Command]
+	cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
 	if ok {
 		cmdFunc(ctx, cmd)
 		return true
@@ -19,11 +19,11 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 
 func Echo(ctx *Context, cmd Command) {
 	output := strings.Join(cmd.Args, " ")
-	ctx.Conn.Write(BulkString(output))
+	ctx.Conn.Write(RBulkString(output))
 }
 
 func Ping(ctx *Context, cmd Command) {
-	ctx.Conn.Write(SimpleString("PONG"))
+	ctx.Conn.Write(RSimpleString("PONG"))
 }
 
 func Set(ctx *Context, cmd Command) {
@@ -49,17 +49,17 @@ func Set(ctx *Context, cmd Command) {
 		}
 	}
 
-	(*ctx.VariableMap)[key] = Variable{
+	(*ctx.State.VariableMap)[key] = Variable{
 		Value:              value,
 		SetAt:              time.Now().UnixMilli(),
 		ExpiryMilliseconds: expiryMilliseconds,
 	}
-	ctx.Conn.Write(SimpleString("OK"))
+	ctx.Conn.Write(RSimpleString("OK"))
 }
 
 func Get(ctx *Context, cmd Command) {
 	key := cmd.Args[0]
-	value, ok := (*ctx.VariableMap)[key]
+	value, ok := (*ctx.State.VariableMap)[key]
 	if ok {
 		isExpired := false
 		nowMillis := time.Now().UnixMilli()
@@ -70,16 +70,31 @@ func Get(ctx *Context, cmd Command) {
 			}
 		}
 		if !isExpired {
-			ctx.Conn.Write(BulkString(value.Value))
+			ctx.Conn.Write(RBulkString(value.Value))
 			return
 		}
 	}
-	ctx.Conn.Write(NullBulkString())
+	ctx.Conn.Write(RNullBulkString())
+}
+
+func Rpush(ctx *Context, cmd Command) {
+	listName := cmd.Args[0]
+	listMap := *ctx.State.ListMap
+	list, ok := listMap[listName]
+	if !ok {
+		list = ListVariable{}
+	}
+	for i := 1; i < len(cmd.Args); i++ {
+		newValue := cmd.Args[i]
+		list.Values = append(list.Values, newValue)
+	}
+	ctx.Conn.Write(RInteger(len(list.Values)))
 }
 
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command){
-	"ECHO": Echo,
-	"PING": Ping,
-	"SET":  Set,
-	"GET":  Get,
+	"ECHO":  Echo,
+	"PING":  Ping,
+	"SET":   Set,
+	"GET":   Get,
+	"RPUSH": Rpush,
 }
