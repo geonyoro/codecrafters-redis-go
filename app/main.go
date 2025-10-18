@@ -8,9 +8,6 @@ import (
 )
 
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	fmt.Println("Logs from your program will appear here!")
-
 	globalState := NewState()
 
 	l, err := net.Listen("tcp4", "0.0.0.0:6379")

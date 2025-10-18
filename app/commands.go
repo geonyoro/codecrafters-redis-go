@@ -92,10 +92,37 @@ func Rpush(ctx *Context, cmd Command) {
 	ctx.Conn.Write(RInteger(len(list.Values)))
 }
 
+func Lrange(ctx *Context, cmd Command) {
+	listName := cmd.Args[0]
+	startIndex, _ := strconv.Atoi(cmd.Args[1])
+	endIndex, _ := strconv.Atoi(cmd.Args[2])
+	listMap := *ctx.State.ListMap
+	list, ok := listMap[listName]
+	if !ok || startIndex >= endIndex {
+		output := []string{}
+		ctx.Conn.Write(RArray(output))
+		return
+	}
+	listSize := len(list.Values)
+	if endIndex >= listSize {
+		endIndex = listSize - 1
+	}
+	accessSize := (endIndex - startIndex) + 1
+	values := make([]string, accessSize)
+
+	for i := 0; i < accessSize; i++ {
+		values[i] = list.Values[i+startIndex]
+	}
+
+	ctx.Conn.Write(RArray(values))
+	return
+}
+
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command){
-	"ECHO":  Echo,
-	"PING":  Ping,
-	"SET":   Set,
-	"GET":   Get,
-	"RPUSH": Rpush,
+	"ECHO":   Echo,
+	"PING":   Ping,
+	"SET":    Set,
+	"GET":    Get,
+	"RPUSH":  Rpush,
+	"LRANGE": Lrange,
 }

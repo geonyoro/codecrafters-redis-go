@@ -9,8 +9,8 @@ func RSimpleString(val string) []byte {
 
 func RBulkString(val string) []byte {
 	valSize := len(val)
-	finalOutput := fmt.Sprintf("$%d\r\n%s\r\n", valSize, val)
-	return []byte(finalOutput)
+	output := fmt.Sprintf("$%d\r\n%s\r\n", valSize, val)
+	return []byte(output)
 }
 
 func RNullBulkString() []byte {
@@ -23,5 +23,15 @@ func RInteger(size int) []byte {
 		sign = "-"
 	}
 	output := fmt.Sprintf(":%s%d\r\n", sign, size)
+	return []byte(output)
+}
+
+func RArray(elems []string) []byte {
+	size := len(elems)
+	outputStr := fmt.Sprintf("*%d\r\n", size)
+	output := []byte(outputStr)
+	for _, elem := range elems {
+		output = append(output, RBulkString(elem)...)
+	}
 	return []byte(output)
 }
