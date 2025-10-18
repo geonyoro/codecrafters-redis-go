@@ -3,8 +3,9 @@ package main
 import "net"
 
 type Variable struct {
-	Value  string
-	Expiry int
+	Value              string
+	SetAt              int64
+	ExpiryMilliseconds int64
 }
 
 type Context struct {
