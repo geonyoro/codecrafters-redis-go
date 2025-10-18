@@ -84,7 +84,7 @@ func Rpush(ctx *Context, cmd Command) {
 	if !ok {
 		list = ListVariable{}
 	}
-	for i := 1; i < len(cmd.Args); i++ {
+	for i := 2; i < len(cmd.Args); i++ {
 		newValue := cmd.Args[i]
 		list.Values = append(list.Values, newValue)
 	}
