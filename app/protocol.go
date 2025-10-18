@@ -23,6 +23,5 @@ func RInteger(size int) []byte {
 		sign = "-"
 	}
 	output := fmt.Sprintf(":%s%d\r\n", sign, size)
-	fmt.Println(output)
 	return []byte(output)
 }

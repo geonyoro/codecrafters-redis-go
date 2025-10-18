@@ -82,9 +82,10 @@ func Rpush(ctx *Context, cmd Command) {
 	listMap := *ctx.State.ListMap
 	list, ok := listMap[listName]
 	if !ok {
-		list = ListVariable{}
+		list = &ListVariable{}
+		listMap[listName] = list
 	}
-	for i := 2; i < len(cmd.Args); i++ {
+	for i := 1; i < len(cmd.Args); i++ {
 		newValue := cmd.Args[i]
 		list.Values = append(list.Values, newValue)
 	}

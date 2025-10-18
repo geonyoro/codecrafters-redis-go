@@ -19,12 +19,12 @@ type Context struct {
 
 type State struct {
 	VariableMap *map[string]Variable
-	ListMap     *map[string]ListVariable
+	ListMap     *map[string]*ListVariable
 }
 
 func NewState() *State {
 	vMap := make(map[string]Variable)
-	lMap := make(map[string]ListVariable)
+	lMap := make(map[string]*ListVariable)
 	return &State{
 		VariableMap: &vMap,
 		ListMap:     &lMap,
