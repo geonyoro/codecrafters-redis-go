@@ -12,3 +12,7 @@ func BulkString(val string) []byte {
 	finalOutput := fmt.Sprintf("$%d\r\n%s\r\n", valSize, val)
 	return []byte(finalOutput)
 }
+
+func NullBulkString() []byte {
+	return []byte("$-1\r\n")
+}

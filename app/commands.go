@@ -38,7 +38,7 @@ func Get(ctx *Context, cmd Command) {
 		ctx.Conn.Write(BulkString(value.Value))
 		return
 	}
-	ctx.Conn.Write(BulkString("OK"))
+	ctx.Conn.Write(NullBulkString())
 }
 
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command){
