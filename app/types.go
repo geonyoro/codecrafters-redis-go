@@ -1,6 +1,8 @@
 package main
 
-import "net"
+import (
+	"io"
+)
 
 type Variable struct {
 	Value              string
@@ -13,7 +15,7 @@ type ListVariable struct {
 }
 
 type Context struct {
-	Conn  net.Conn
+	Conn  io.ReadWriteCloser
 	State *State
 }
 

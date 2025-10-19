@@ -7,7 +7,8 @@ import (
 )
 
 func TestParseInput(t *testing.T) {
-	output := ParseInput("*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n")
+	output, err := ParseInput("*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n")
+	assert.Nil(t, err)
 	assert.Equal(t, output, Command{
 		Command: "ECHO",
 		Args: []string{

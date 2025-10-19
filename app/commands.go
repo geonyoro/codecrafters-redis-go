@@ -110,12 +110,11 @@ func Lrange(ctx *Context, cmd Command) {
 	accessSize := (endIndex - startIndex) + 1
 	values := make([]string, accessSize)
 
-	for i := 0; i < accessSize; i++ {
+	for i := range accessSize {
 		values[i] = list.Values[i+startIndex]
 	}
 
 	ctx.Conn.Write(RArray(values))
-	return
 }
 
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command){
