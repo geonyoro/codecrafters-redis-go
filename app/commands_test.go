@@ -130,3 +130,21 @@ func TestConvertLrangeIndex(t *testing.T) {
 		})
 	}
 }
+
+func TestLPush(t *testing.T) {
+	ctx := &Context{
+		Conn:  &DummyConn{},
+		State: NewState(),
+	}
+	lMap := *ctx.State.ListMap
+	list := []string{"1", "2", "3"}
+	lMap["list"] = &ListVariable{
+		list,
+	}
+	cmd := Command{
+		"LPUSH",
+		[]string{"list", "a", "b", "c"},
+	}
+	ret := Lpush(ctx, cmd)
+	assert.Equal(t, []string{"c", "b", "a", "1", "2", "3"}, ret.EncoderArgs)
+}

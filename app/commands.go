@@ -82,6 +82,27 @@ func Get(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RNullBulkString, nil}
 }
 
+func Lpush(ctx *Context, cmd Command) ReturnValue {
+	listName := cmd.Args[0]
+	listMap := *ctx.State.ListMap
+	list, ok := listMap[listName]
+	if !ok {
+		list = &ListVariable{}
+		listMap[listName] = list
+	}
+	argSize := len(cmd.Args) - 1
+	newList := make([]string, argSize)
+	for i, arg := range cmd.Args {
+		if i == 0 {
+			continue
+		}
+		newList[argSize-i] = arg
+	}
+	newList = append(newList, list.Values...)
+	list.Values = newList
+	return ReturnValue{RInteger, list.Values}
+}
+
 func Rpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := *ctx.State.ListMap
@@ -138,7 +159,6 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 			endIndex = len(listVar.Values) + endIndex
 		}
 	}
-	fmt.Println(startIndex, endIndex, maxNegativeIndex)
 	if !ok || startIndex >= endIndex {
 		output := []string{}
 		return ReturnValue{RArray, output}
@@ -157,9 +177,10 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"ECHO":   Echo,
-	"PING":   Ping,
-	"SET":    Set,
 	"GET":    Get,
-	"RPUSH":  Rpush,
 	"LRANGE": Lrange,
+	"PING":   Ping,
+	"LPUSH":  Lpush,
+	"RPUSH":  Rpush,
+	"SET":    Set,
 }
