@@ -24,27 +24,27 @@ func (d *DummyConn) Close() error {
 	return nil
 }
 
-// func TestLrange_NegativeNos(t *testing.T) {
-// 	dConn := DummyConn{
-// 		Data: []byte{},
-// 	}
-// 	ctx := &Context{
-// 		Conn:  &dConn,
-// 		State: NewState(),
-// 	}
-// 	lmap := *ctx.State.ListMap
-// 	lvar := ListVariable{
-// 		Values: []string{"a", "b", "c", "d", "e"},
-// 	}
-// 	lmap["list"] = &lvar
-// 	cmd := Command{
-// 		Command: "LRANGE",
-// 		Args:    []string{"list", "-2", "-1"},
-// 	}
-//
-// 	Lrange(ctx, cmd)
-// 	assert.Equal(t, []byte("*2\r\n$1\r\nd\r\n$1\r\ne\r\n"), dConn.Data)
-// }
+func TestLrange_NegativeNos(t *testing.T) {
+	dConn := DummyConn{
+		Data: []byte{},
+	}
+	ctx := &Context{
+		Conn:  &dConn,
+		State: NewState(),
+	}
+	lmap := *ctx.State.ListMap
+	lvar := ListVariable{
+		Values: []string{"a", "b", "c", "d", "e"},
+	}
+	lmap["list"] = &lvar
+	cmd := Command{
+		Command: "LRANGE",
+		Args:    []string{"list", "-2", "-1"},
+	}
+
+	Lrange(ctx, cmd)
+	assert.Equal(t, []byte("*2\r\n$1\r\nd\r\n$1\r\ne\r\n"), dConn.Data)
+}
 
 func TestLrangeBasic(t *testing.T) {
 	dConn := DummyConn{

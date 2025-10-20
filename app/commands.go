@@ -94,16 +94,24 @@ func Rpush(ctx *Context, cmd Command) {
 
 func Lrange(ctx *Context, cmd Command) {
 	listName := cmd.Args[0]
+	listMap := *ctx.State.ListMap
+	listVar, ok := listMap[listName]
+	// access the indexes
 	startIndex, _ := strconv.Atoi(cmd.Args[1])
 	endIndex, _ := strconv.Atoi(cmd.Args[2])
-	listMap := *ctx.State.ListMap
-	list, ok := listMap[listName]
+	// manipulate the indexes
+	if startIndex < 0 {
+		startIndex = len(listVar.Values) + startIndex
+	}
+	if endIndex < 0 {
+		endIndex = len(listVar.Values) + endIndex
+	}
 	if !ok || startIndex >= endIndex {
 		output := []string{}
 		ctx.Conn.Write(RArray(output))
 		return
 	}
-	listSize := len(list.Values)
+	listSize := len(listVar.Values)
 	if endIndex >= listSize {
 		endIndex = listSize - 1
 	}
@@ -111,7 +119,7 @@ func Lrange(ctx *Context, cmd Command) {
 	values := make([]string, accessSize)
 
 	for i := range accessSize {
-		values[i] = list.Values[i+startIndex]
+		values[i] = listVar.Values[i+startIndex]
 	}
 
 	ctx.Conn.Write(RArray(values))
