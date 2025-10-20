@@ -2,22 +2,25 @@ package main
 
 import "fmt"
 
-func RSimpleString(val string) []byte {
+func RSimpleString(arg any) []byte {
+	val := arg.(string)
 	retString := fmt.Sprintf("+%s\r\n", val)
 	return []byte(retString)
 }
 
-func RBulkString(val string) []byte {
+func RBulkString(arg any) []byte {
+	val := arg.(string)
 	valSize := len(val)
 	output := fmt.Sprintf("$%d\r\n%s\r\n", valSize, val)
 	return []byte(output)
 }
 
-func RNullBulkString() []byte {
+func RNullBulkString(arg any) []byte {
 	return []byte("$-1\r\n")
 }
 
-func RInteger(size int) []byte {
+func RInteger(arg any) []byte {
+	size := arg.(int)
 	sign := ""
 	if size < 0 {
 		sign = "-"
@@ -26,7 +29,8 @@ func RInteger(size int) []byte {
 	return []byte(output)
 }
 
-func RArray(elems []string) []byte {
+func RArray(arg any) []byte {
+	elems := arg.([]string)
 	size := len(elems)
 	outputStr := fmt.Sprintf("*%d\r\n", size)
 	output := []byte(outputStr)

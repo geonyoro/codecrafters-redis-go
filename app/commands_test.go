@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,13 +38,55 @@ func TestLrange_NegativeNos(t *testing.T) {
 		Values: []string{"a", "b", "c", "d", "e"},
 	}
 	lmap["list"] = &lvar
-	cmd := Command{
-		Command: "LRANGE",
-		Args:    []string{"list", "-2", "-1"},
+	testCases := []struct {
+		description string
+		index1      string
+		index2      string
+		output      []string
+	}{
+		{
+			description: "last 2 elements",
+			index1:      "-2",
+			index2:      "-1",
+			output:      []string{"d", "e"},
+		},
+		{
+			description: "all elements except the last 2",
+			index1:      "0",
+			index2:      "-3",
+			output:      []string{"a", "b", "c"},
+		},
+		{
+			description: "all elements with negative indexes",
+			index1:      "-5",
+			index2:      "-1",
+			output:      []string{"a", "b", "c", "d", "e"},
+		},
+		{
+			description: "all elements with out of bound negatives",
+			index1:      "-6",
+			index2:      "-1",
+			output:      []string{"a", "b", "c", "d", "e"},
+		},
+		{
+			description: "all elements with out of bound negatives and bigger",
+			index1:      "-6",
+			index2:      "-7",
+			output:      []string{},
+		},
 	}
 
-	Lrange(ctx, cmd)
-	assert.Equal(t, []byte("*2\r\n$1\r\nd\r\n$1\r\ne\r\n"), dConn.Data)
+	for _, testCase := range testCases {
+		t.Run(testCase.description, func(t *testing.T) {
+			cmd := Command{
+				Command: "LRANGE",
+				Args:    []string{"list", testCase.index1, testCase.index2},
+			}
+
+			retVal := Lrange(ctx, cmd)
+			assert.Equal(t, testCase.output, retVal.EncoderArgs)
+		})
+	}
 }
 
 func TestLrangeBasic(t *testing.T) {
@@ -64,6 +107,26 @@ func TestLrangeBasic(t *testing.T) {
 		Args:    []string{"list", "1", "2"},
 	}
 
-	Lrange(ctx, cmd)
-	assert.Equal(t, []byte("*2\r\n$1\r\nb\r\n$1\r\nc\r\n"), dConn.Data)
+	output := Lrange(ctx, cmd)
+	assert.Equal(t, []string{"b", "c"}, output.EncoderArgs)
+}
+
+func TestConvertLrangeIndex(t *testing.T) {
+	for _, testCase := range []struct {
+		listSize int
+		index    int
+		output   uint
+	}{
+		{listSize: 5, index: 0, output: 0},
+		{listSize: 5, index: 4, output: 4},
+		{listSize: 5, index: 5, output: 4},
+		{listSize: 5, index: -1, output: 4},
+		{listSize: 5, index: -5, output: 0},
+		{listSize: 5, index: -6, output: 0},
+	} {
+		t.Run(fmt.Sprintf("%#v", testCase), func(t *testing.T) {
+			output := convertLrangeIndex(testCase.listSize, testCase.index)
+			assert.Equal(t, testCase.output, output)
+		})
+	}
 }

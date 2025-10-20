@@ -7,26 +7,32 @@ import (
 	"time"
 )
 
+type ReturnValue struct {
+	Encoder     func(arg any) []byte
+	EncoderArgs any
+}
+
 func ExecuteCommand(ctx *Context, cmd Command) bool {
 	cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
 	if ok {
-		cmdFunc(ctx, cmd)
+		returnVal := cmdFunc(ctx, cmd)
+		returnVal.Encoder(returnVal.EncoderArgs)
 		return true
 	}
 	fmt.Println("Failed to find cmd for", cmd.Command)
 	return false
 }
 
-func Echo(ctx *Context, cmd Command) {
+func Echo(ctx *Context, cmd Command) ReturnValue {
 	output := strings.Join(cmd.Args, " ")
-	ctx.Conn.Write(RBulkString(output))
+	return ReturnValue{RBulkString, output}
 }
 
-func Ping(ctx *Context, cmd Command) {
-	ctx.Conn.Write(RSimpleString("PONG"))
+func Ping(ctx *Context, cmd Command) ReturnValue {
+	return ReturnValue{RSimpleString, "PONG"}
 }
 
-func Set(ctx *Context, cmd Command) {
+func Set(ctx *Context, cmd Command) ReturnValue {
 	key := cmd.Args[0]
 	value := cmd.Args[1]
 
@@ -54,10 +60,10 @@ func Set(ctx *Context, cmd Command) {
 		SetAt:              time.Now().UnixMilli(),
 		ExpiryMilliseconds: expiryMilliseconds,
 	}
-	ctx.Conn.Write(RSimpleString("OK"))
+	return ReturnValue{RSimpleString, "OK"}
 }
 
-func Get(ctx *Context, cmd Command) {
+func Get(ctx *Context, cmd Command) ReturnValue {
 	key := cmd.Args[0]
 	value, ok := (*ctx.State.VariableMap)[key]
 	if ok {
@@ -70,14 +76,13 @@ func Get(ctx *Context, cmd Command) {
 			}
 		}
 		if !isExpired {
-			ctx.Conn.Write(RBulkString(value.Value))
-			return
+			return ReturnValue{RBulkString, value.Value}
 		}
 	}
-	ctx.Conn.Write(RNullBulkString())
+	return ReturnValue{RNullBulkString, nil}
 }
 
-func Rpush(ctx *Context, cmd Command) {
+func Rpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := *ctx.State.ListMap
 	list, ok := listMap[listName]
@@ -89,29 +94,55 @@ func Rpush(ctx *Context, cmd Command) {
 		newValue := cmd.Args[i]
 		list.Values = append(list.Values, newValue)
 	}
-	ctx.Conn.Write(RInteger(len(list.Values)))
+	return ReturnValue{RInteger, len(list.Values)}
 }
 
-func Lrange(ctx *Context, cmd Command) {
+func convertLrangeIndex(listSize int, index int) uint {
+	maxNegativeIndex := 0 - listSize
+	// manipulate the indexes
+	if index < 0 {
+		if index < maxNegativeIndex {
+			index = 0
+		} else {
+			index = listSize + index
+		}
+	} else {
+		if index >= listSize {
+			index = listSize - 1
+		}
+	}
+	return uint(index)
+}
+
+func Lrange(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := *ctx.State.ListMap
 	listVar, ok := listMap[listName]
+	listSize := len(listVar.Values)
 	// access the indexes
 	startIndex, _ := strconv.Atoi(cmd.Args[1])
 	endIndex, _ := strconv.Atoi(cmd.Args[2])
+	maxNegativeIndex := 0 - listSize
 	// manipulate the indexes
 	if startIndex < 0 {
-		startIndex = len(listVar.Values) + startIndex
+		if startIndex < maxNegativeIndex {
+			startIndex = 0
+		} else {
+			startIndex = len(listVar.Values) + startIndex
+		}
 	}
 	if endIndex < 0 {
-		endIndex = len(listVar.Values) + endIndex
+		if endIndex < maxNegativeIndex {
+			endIndex = 0
+		} else {
+			endIndex = len(listVar.Values) + endIndex
+		}
 	}
+	fmt.Println(startIndex, endIndex, maxNegativeIndex)
 	if !ok || startIndex >= endIndex {
 		output := []string{}
-		ctx.Conn.Write(RArray(output))
-		return
+		return ReturnValue{RArray, output}
 	}
-	listSize := len(listVar.Values)
 	if endIndex >= listSize {
 		endIndex = listSize - 1
 	}
@@ -121,11 +152,10 @@ func Lrange(ctx *Context, cmd Command) {
 	for i := range accessSize {
 		values[i] = listVar.Values[i+startIndex]
 	}
-
-	ctx.Conn.Write(RArray(values))
+	return ReturnValue{RArray, values}
 }
 
-var CmdFuncMap = map[string]func(ctx *Context, cmd Command){
+var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"ECHO":   Echo,
 	"PING":   Ping,
 	"SET":    Set,
