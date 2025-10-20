@@ -82,6 +82,16 @@ func Get(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RNullBulkString, nil}
 }
 
+func Llen(ctx *Context, cmd Command) ReturnValue {
+	listName := cmd.Args[0]
+	listMap := *ctx.State.ListMap
+	list, ok := listMap[listName]
+	if !ok {
+		return ReturnValue{RInteger, 0}
+	}
+	return ReturnValue{RNullBulkString, len(list.Values)}
+}
+
 func Lpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := *ctx.State.ListMap
@@ -100,7 +110,7 @@ func Lpush(ctx *Context, cmd Command) ReturnValue {
 	}
 	newList = append(newList, list.Values...)
 	list.Values = newList
-	return ReturnValue{RInteger, list.Values}
+	return ReturnValue{RInteger, len(list.Values)}
 }
 
 func Rpush(ctx *Context, cmd Command) ReturnValue {
@@ -180,6 +190,7 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"GET":    Get,
 	"LRANGE": Lrange,
 	"PING":   Ping,
+	"LLEN":   Llen,
 	"LPUSH":  Lpush,
 	"RPUSH":  Rpush,
 	"SET":    Set,
