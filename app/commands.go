@@ -16,7 +16,8 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 	cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
 	if ok {
 		returnVal := cmdFunc(ctx, cmd)
-		returnVal.Encoder(returnVal.EncoderArgs)
+		encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
+		ctx.Conn.Write(encodedVal)
 		return true
 	}
 	fmt.Println("Failed to find cmd for", cmd.Command)
