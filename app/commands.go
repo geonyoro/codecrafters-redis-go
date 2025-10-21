@@ -103,9 +103,16 @@ func Lpop(ctx *Context, cmd Command) ReturnValue {
 			EncoderArgs: 1,
 		}
 	}
-	value := list.Values[0]
-	list.Values = list.Values[1:len(list.Values)]
-	return ReturnValue{RSimpleString, value}
+	if len(cmd.Args) == 1 {
+		// remove a single value
+		value := list.Values[0]
+		list.Values = list.Values[1:len(list.Values)]
+		return ReturnValue{RSimpleString, value}
+	}
+	size, _ := strconv.Atoi(cmd.Args[1])
+	values := list.Values[:size]
+	list.Values = list.Values[size:]
+	return ReturnValue{RArray, values}
 }
 
 func Lpush(ctx *Context, cmd Command) ReturnValue {
