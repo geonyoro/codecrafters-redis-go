@@ -24,6 +24,47 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 	return false
 }
 
+func Blpop(ctx *Context, cmd Command) ReturnValue {
+	listName := cmd.Args[0]
+	listMap := *ctx.State.ListMap
+	list, ok := listMap[listName]
+	if !ok {
+		// create the list
+		list = &ListVariable{}
+		listMap[listName] = list
+	}
+
+	// access timeout
+	var timeout float64 = 0
+	if len(cmd.Args) > 1 {
+		if ttimeout, err := strconv.ParseFloat(cmd.Args[1], 64); err == nil {
+			timeout = ttimeout
+		}
+	}
+	startTime := time.Now()
+	for {
+		if len(list.Values) > 0 {
+			elem := list.Values[0]
+			list.Values = list.Values[1:len(list.Values)]
+			return ReturnValue{
+				Encoder:     RArray,
+				EncoderArgs: []string{listName, elem},
+			}
+		}
+		if timeout > 0 {
+			endTime := startTime.Add(time.Second * time.Duration(timeout))
+			if endTime.After(time.Now()) {
+				// it has expired
+				return ReturnValue{
+					Encoder:     RNullArray,
+					EncoderArgs: 1,
+				}
+			}
+		}
+		time.Sleep(time.Millisecond * time.Duration(10))
+	}
+}
+
 func Echo(ctx *Context, cmd Command) ReturnValue {
 	output := strings.Join(cmd.Args, " ")
 	return ReturnValue{RBulkString, output}
@@ -212,6 +253,7 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 }
 
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
+	"BLPOP":  Blpop,
 	"ECHO":   Echo,
 	"GET":    Get,
 	"LRANGE": Lrange,

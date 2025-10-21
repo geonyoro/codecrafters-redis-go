@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"sync"
 )
 
 type Variable struct {
@@ -12,6 +13,7 @@ type Variable struct {
 
 type ListVariable struct {
 	Values []string
+	Mu     sync.Mutex
 }
 
 type Context struct {

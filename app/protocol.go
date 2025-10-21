@@ -19,6 +19,10 @@ func RNullBulkString(arg any) []byte {
 	return []byte("$-1\r\n")
 }
 
+func RNullArray(arg any) []byte {
+	return []byte("*-1\r\n")
+}
+
 func RInteger(arg any) []byte {
 	size := arg.(int)
 	sign := ""
