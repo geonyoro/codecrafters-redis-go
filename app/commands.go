@@ -150,6 +150,9 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := *ctx.State.ListMap
 	listVar, ok := listMap[listName]
+	if !ok {
+		return ReturnValue{RArray, []string{}}
+	}
 	listSize := len(listVar.Values)
 	// access the indexes
 	startIndex, _ := strconv.Atoi(cmd.Args[1])
