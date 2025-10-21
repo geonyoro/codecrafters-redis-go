@@ -53,7 +53,7 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 		}
 		if timeout > 0 {
 			endTime := startTime.Add(time.Second * time.Duration(timeout))
-			if endTime.After(time.Now()) {
+			if time.Now().After(endTime) {
 				// it has expired
 				return ReturnValue{
 					Encoder:     RNullArray,
