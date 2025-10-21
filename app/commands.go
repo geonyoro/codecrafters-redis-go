@@ -255,6 +255,32 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RArray, values}
 }
 
+func Type(ctx *Context, cmd Command) ReturnValue {
+	key := cmd.Args[0]
+	// string, list, set, zset, hash, stream, vectorset
+	state := *ctx.State
+
+	varMap := *state.VariableMap
+	if _, ok := varMap[key]; ok {
+		return ReturnValue{
+			RSimpleString,
+			"string",
+		}
+	}
+
+	lMap := *state.ListMap
+	if _, ok := lMap[key]; ok {
+		return ReturnValue{
+			RSimpleString,
+			"list",
+		}
+	}
+	return ReturnValue{
+		RSimpleString,
+		"none",
+	}
+}
+
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
 	"ECHO":   Echo,
@@ -266,4 +292,5 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"LPUSH":  Lpush,
 	"RPUSH":  Rpush,
 	"SET":    Set,
+	"TYPE":   Type,
 }
