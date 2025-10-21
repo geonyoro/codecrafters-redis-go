@@ -90,7 +90,7 @@ func Llen(ctx *Context, cmd Command) ReturnValue {
 	if !ok {
 		return ReturnValue{RInteger, 0}
 	}
-	return ReturnValue{RNullBulkString, len(list.Values)}
+	return ReturnValue{RInteger, len(list.Values)}
 }
 
 func Lpush(ctx *Context, cmd Command) ReturnValue {
