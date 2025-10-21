@@ -38,10 +38,14 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 	var timeout float64 = 0
 	if len(cmd.Args) > 1 {
 		if ttimeout, err := strconv.ParseFloat(cmd.Args[1], 64); err == nil {
-			timeout = ttimeout
+			timeout = ttimeout * 1000
 		}
 	}
 	startTime := time.Now()
+	var endTime time.Time
+	if timeout > 0 {
+		endTime = startTime.Add(time.Millisecond * time.Duration(timeout))
+	}
 	for {
 		if len(list.Values) > 0 {
 			elem := list.Values[0]
@@ -52,7 +56,6 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 			}
 		}
 		if timeout > 0 {
-			endTime := startTime.Add(time.Second * time.Duration(timeout))
 			if time.Now().After(endTime) {
 				// it has expired
 				return ReturnValue{
