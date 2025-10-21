@@ -93,6 +93,21 @@ func Llen(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RInteger, len(list.Values)}
 }
 
+func Lpop(ctx *Context, cmd Command) ReturnValue {
+	listName := cmd.Args[0]
+	listMap := *ctx.State.ListMap
+	list, ok := listMap[listName]
+	if !ok || len(list.Values) == 0 {
+		return ReturnValue{
+			Encoder:     RNullBulkString,
+			EncoderArgs: 1,
+		}
+	}
+	value := list.Values[0]
+	list.Values = list.Values[1:len(list.Values)]
+	return ReturnValue{RSimpleString, value}
+}
+
 func Lpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := *ctx.State.ListMap
@@ -195,6 +210,7 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"LRANGE": Lrange,
 	"PING":   Ping,
 	"LLEN":   Llen,
+	"LPOP":   Lpop,
 	"LPUSH":  Lpush,
 	"RPUSH":  Rpush,
 	"SET":    Set,
