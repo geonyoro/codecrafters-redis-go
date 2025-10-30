@@ -8,6 +8,12 @@ func RSimpleString(arg any) []byte {
 	return []byte(retString)
 }
 
+func RSimpleError(arg any) []byte {
+	val := arg.(string)
+	retString := fmt.Sprintf("-%s\r\n", val)
+	return []byte(retString)
+}
+
 func RBulkString(arg any) []byte {
 	val := arg.(string)
 	valSize := len(val)

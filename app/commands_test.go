@@ -183,6 +183,6 @@ func TestXadd(t *testing.T) {
 	stream, ok := sMap["stream_key"]
 	assert.True(t, ok) // ensure the stream key exists
 	entryMap := stream.Entries[streamId]
-	assert.Equal(t, entryMap["humidity"], "95")
-	assert.Equal(t, entryMap["temperature"], "36")
+	assert.Equal(t, "95", entryMap["humidity"])
+	assert.Equal(t, "36", entryMap["temperature"])
 }

@@ -303,6 +303,24 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 	}
 
 	id := cmd.Args[1]
+	if id == "0-0" {
+		return ReturnValue{
+			RSimpleError,
+			"ERR The ID specified in XADD must be greater than 0-0",
+		}
+	}
+
+	stringParts := strings.Split(id, "-")
+	millis, _ := strconv.Atoi(stringParts[0])
+	sequence, _ := strconv.Atoi(stringParts[1])
+	if !IsValidNewStreamId(stream.LastEntry, millis, sequence) {
+		return ReturnValue{
+			RSimpleError,
+			"ERR The ID specified in XADD is equal or smaller than the target stream top item",
+		}
+	}
+	stream.LastEntry = []int{millis, sequence}
+
 	stream.Entries[id] = Entry{}
 	// first 2 entries are taken by stream and id
 	// iterate in batches of 2

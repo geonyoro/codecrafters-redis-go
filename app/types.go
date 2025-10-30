@@ -19,9 +19,23 @@ type ListVariable struct {
 type (
 	Entry  map[string]string // maps a key to a value
 	Stream struct {
-		Entries map[string]Entry // maps stream Id to the ValueSet
+		Entries   map[string]Entry // maps stream Id to the ValueSet
+		LastEntry []int
 	}
 )
+
+func IsValidNewStreamId(lastEntry []int, millis, sequence int) bool {
+	if len(lastEntry) == 0 {
+		return true
+	}
+	if lastEntry[0] > millis {
+		return false
+	}
+	if lastEntry[1] >= sequence {
+		return false
+	}
+	return true
+}
 
 type Context struct {
 	Conn  io.ReadWriteCloser
