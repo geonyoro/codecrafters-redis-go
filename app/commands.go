@@ -275,6 +275,15 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 			"list",
 		}
 	}
+
+	streamMap := *state.StreamMap
+	if _, ok := streamMap[key]; ok {
+		return ReturnValue{
+			RSimpleString,
+			"stream",
+		}
+	}
+
 	return ReturnValue{
 		RSimpleString,
 		"none",
