@@ -281,6 +281,33 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 	}
 }
 
+func Xadd(ctx *Context, cmd Command) ReturnValue {
+	streamKey := cmd.Args[0]
+	streamMap := *ctx.State.StreamMap
+	stream, ok := streamMap[streamKey]
+	if !ok {
+		// make the stream
+		stream = &Stream{
+			Entries: make(map[string]Entry),
+		}
+		streamMap[streamKey] = stream
+	}
+
+	id := cmd.Args[1]
+	stream.Entries[id] = Entry{}
+	// first 2 entries are taken by stream and id
+	// iterate in batches of 2
+	for i := range (len(cmd.Args) - 2) / 2 {
+		idx := (i + 1) * 2
+		key, value := cmd.Args[idx], cmd.Args[idx+1]
+		stream.Entries[id][key] = value
+	}
+	return ReturnValue{
+		RBulkString,
+		id,
+	}
+}
+
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
 	"ECHO":   Echo,
@@ -293,4 +320,5 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"RPUSH":  Rpush,
 	"SET":    Set,
 	"TYPE":   Type,
+	"XADD":   Xadd,
 }

@@ -139,7 +139,7 @@ func TestLPush(t *testing.T) {
 	lMap := *ctx.State.ListMap
 	list := []string{"1", "2", "3"}
 	lMap["list"] = &ListVariable{
-		list,
+		Values: list,
 	}
 	cmd := Command{
 		"LPUSH",
@@ -157,7 +157,7 @@ func TestLlen(t *testing.T) {
 	lMap := *ctx.State.ListMap
 	list := []string{"1", "2", "3"}
 	lMap["list"] = &ListVariable{
-		list,
+		Values: list,
 	}
 	cmd := Command{
 		"LLEN",
@@ -165,4 +165,24 @@ func TestLlen(t *testing.T) {
 	}
 	ret := Llen(ctx, cmd)
 	assert.Equal(t, 3, ret.EncoderArgs)
+}
+
+func TestXadd(t *testing.T) {
+	ctx := &Context{
+		Conn:  &DummyConn{},
+		State: NewState(),
+	}
+	streamId := "1526919030474-0"
+	cmd := Command{
+		"XADD",
+		[]string{"stream_key", streamId, "temperature", "36", "humidity", "95"},
+	}
+	ret := Xadd(ctx, cmd)
+	assert.Equal(t, streamId, ret.EncoderArgs)
+	sMap := *ctx.State.StreamMap
+	stream, ok := sMap["stream_key"]
+	assert.True(t, ok) // ensure the stream key exists
+	entryMap := stream.Entries[streamId]
+	assert.Equal(t, entryMap["humidity"], "95")
+	assert.Equal(t, entryMap["temperature"], "36")
 }
