@@ -42,6 +42,10 @@ func (s *Stream) GetOrCreateMillis(id string) *MillisVal {
 	// create it and then ensure the keys are sorted
 	millisVal = NewMillisVal()
 	s.Map[id] = millisVal
+	// we cannot have 0-0, so make sure last is set to 0 already
+	if id == "0" {
+		millisVal.Last = 0
+	}
 
 	// cannot happen, has been validated before
 	idInt, _ := strconv.Atoi(id)
