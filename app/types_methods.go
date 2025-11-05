@@ -4,6 +4,7 @@ import (
 	"maps"
 	"slices"
 	"strconv"
+	"time"
 )
 
 func (m *MillisVal) GetOrCreateSequence(id string) (SequenceKV, error) {
@@ -62,7 +63,8 @@ func (s *Stream) GetOrCreateMillis(id string) *MillisVal {
 }
 
 func (s *Stream) GenerateMillis() string {
-	return strconv.Itoa(s.Last + 1)
+	millis := int(time.Now().UnixMilli())
+	return strconv.Itoa(millis)
 }
 
 func (s *Stream) GenerateSequence(millis string) string {
