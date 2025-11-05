@@ -8,8 +8,15 @@ import (
 
 func TestIsValidNewStreamId(t *testing.T) {
 	s := NewStream()
-	assert.True(t, s.IsNewStreamIdValid(1, 0))
+	isValid, err := s.IsNewStreamIdValid("1", "0")
+	assert.True(t, isValid)
+	assert.Nil(t, err)
+
 	// add these keys to the stream
 	s.AddIdWithKV("1", "0", map[string]string{"foo": "bar"})
-	assert.False(t, s.IsNewStreamIdValid(1, 0))
+
+	// rerun tests
+	isValid, err = s.IsNewStreamIdValid("1", "0")
+	assert.Nil(t, err)
+	assert.False(t, isValid)
 }

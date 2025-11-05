@@ -32,13 +32,15 @@ type (
 
 func NewMillisVal() *MillisVal {
 	return &MillisVal{
-		Map: make(map[string]SequenceKV),
+		Map:  make(map[string]SequenceKV),
+		Last: -1,
 	}
 }
 
 func NewStream() *Stream {
 	return &Stream{
-		Map: make(map[string]*MillisVal),
+		Map:  make(map[string]*MillisVal),
+		Last: -1,
 	}
 }
 

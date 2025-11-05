@@ -302,15 +302,31 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	stringParts := strings.Split(id, "-")
-	millisStr := stringParts[0]
-	sequenceStr := stringParts[1]
-	millis, _ := strconv.Atoi(millisStr)
-	sequence, _ := strconv.Atoi(sequenceStr)
-	if !stream.IsNewStreamIdValid(millis, sequence) {
-		return ReturnValue{
-			RSimpleError,
-			"ERR The ID specified in XADD is equal or smaller than the target stream top item",
+	var millis, sequence string
+	if id == "*" {
+		// full generation mode
+		millis = stream.GenerateMillis()
+		sequence = stream.GenerateSequence(millis)
+	} else {
+		stringParts := strings.Split(id, "-")
+		millis = stringParts[0]
+		sequence = stringParts[1]
+		isValid, err := stream.IsNewStreamIdValid(millis, sequence)
+		if err != nil {
+			return ReturnValue{
+				RSimpleError,
+				"ERR Unknown Error",
+			}
+		}
+		if !isValid {
+			return ReturnValue{
+				RSimpleError,
+				"ERR The ID specified in XADD is equal or smaller than the target stream top item",
+			}
+		}
+
+		if sequence == "*" {
+			sequence = stream.GenerateSequence(millis)
 		}
 	}
 
@@ -322,7 +338,13 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 		key, value := cmd.Args[idx], cmd.Args[idx+1]
 		kvMap[key] = value
 	}
-	stream.AddIdWithKV(millisStr, sequenceStr, kvMap)
+	err := stream.AddIdWithKV(millis, sequence, kvMap)
+	if err != nil {
+		return ReturnValue{
+			RSimpleError,
+			"ERR Unknown Error",
+		}
+	}
 	return ReturnValue{
 		RBulkString,
 		id,
