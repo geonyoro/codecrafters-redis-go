@@ -33,7 +33,7 @@ type (
 func NewMillisVal() *MillisVal {
 	return &MillisVal{
 		Map:  make(map[string]SequenceKV),
-		Last: -1,
+		Last: 0,
 	}
 }
 
