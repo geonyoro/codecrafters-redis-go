@@ -292,15 +292,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 
 func Xadd(ctx *Context, cmd Command) ReturnValue {
 	streamKey := cmd.Args[0]
-	streamMap := *ctx.State.StreamMap
-	stream, ok := streamMap[streamKey]
-	if !ok {
-		// make the stream
-		stream = &Stream{
-			Entries: make(map[string]Entry),
-		}
-		streamMap[streamKey] = stream
-	}
+	stream := ctx.State.GetOrCreateStreamForKey(streamKey)
 
 	id := cmd.Args[1]
 	if id == "0-0" {
@@ -311,24 +303,26 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 	}
 
 	stringParts := strings.Split(id, "-")
-	millis, _ := strconv.Atoi(stringParts[0])
-	sequence, _ := strconv.Atoi(stringParts[1])
-	if !IsValidNewStreamId(stream.LastEntry, millis, sequence) {
+	millisStr := stringParts[0]
+	sequenceStr := stringParts[1]
+	millis, _ := strconv.Atoi(millisStr)
+	sequence, _ := strconv.Atoi(sequenceStr)
+	if !stream.IsNewStreamIdValid(millis, sequence) {
 		return ReturnValue{
 			RSimpleError,
 			"ERR The ID specified in XADD is equal or smaller than the target stream top item",
 		}
 	}
-	stream.LastEntry = []int{millis, sequence}
 
-	stream.Entries[id] = Entry{}
 	// first 2 entries are taken by stream and id
 	// iterate in batches of 2
+	kvMap := make(map[string]string)
 	for i := range (len(cmd.Args) - 2) / 2 {
 		idx := (i + 1) * 2
 		key, value := cmd.Args[idx], cmd.Args[idx+1]
-		stream.Entries[id][key] = value
+		kvMap[key] = value
 	}
+	stream.AddIdWithKV(millisStr, sequenceStr, kvMap)
 	return ReturnValue{
 		RBulkString,
 		id,

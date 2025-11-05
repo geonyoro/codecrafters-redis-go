@@ -7,6 +7,9 @@ import (
 )
 
 func TestIsValidNewStreamId(t *testing.T) {
-	assert.True(t, IsValidNewStreamId([]int{}, 1, 0))
-	assert.False(t, IsValidNewStreamId([]int{1, 0}, 1, 0))
+	s := NewStream()
+	assert.True(t, s.IsNewStreamIdValid(1, 0))
+	// add these keys to the stream
+	s.AddIdWithKV("1", "0", map[string]string{"foo": "bar"})
+	assert.False(t, s.IsNewStreamIdValid(1, 0))
 }

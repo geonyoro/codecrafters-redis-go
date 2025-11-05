@@ -17,24 +17,29 @@ type ListVariable struct {
 }
 
 type (
-	Entry  map[string]string // maps a key to a value
+	SequenceKV map[string]string // maps a key to a value
+	MillisVal  struct {
+		Map  map[string]SequenceKV // maps a sequenceId to Entry
+		Keys []string              // stored as sorted list of ints
+		Last int                   // latest
+	}
 	Stream struct {
-		Entries   map[string]Entry // maps stream Id to the ValueSet
-		LastEntry []int
+		Map  map[string]*MillisVal // maps streamId to the StreamValue
+		Keys []string              // stored as sorted list of ints
+		Last int                   // latest
 	}
 )
 
-func IsValidNewStreamId(lastEntry []int, millis, sequence int) bool {
-	if len(lastEntry) == 0 {
-		return true
+func NewMillisVal() *MillisVal {
+	return &MillisVal{
+		Map: make(map[string]SequenceKV),
 	}
-	if lastEntry[0] > millis {
-		return false
+}
+
+func NewStream() *Stream {
+	return &Stream{
+		Map: make(map[string]*MillisVal),
 	}
-	if lastEntry[1] >= sequence {
-		return false
-	}
-	return true
 }
 
 type Context struct {

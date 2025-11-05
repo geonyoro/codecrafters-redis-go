@@ -172,7 +172,9 @@ func TestXadd(t *testing.T) {
 		Conn:  &DummyConn{},
 		State: NewState(),
 	}
-	streamId := "1526919030474-0"
+	millis := "1526919030474"
+	sequence := "0"
+	streamId := fmt.Sprintf("%s-%s", millis, sequence)
 	cmd := Command{
 		"XADD",
 		[]string{"stream_key", streamId, "temperature", "36", "humidity", "95"},
@@ -182,7 +184,8 @@ func TestXadd(t *testing.T) {
 	sMap := *ctx.State.StreamMap
 	stream, ok := sMap["stream_key"]
 	assert.True(t, ok) // ensure the stream key exists
-	entryMap := stream.Entries[streamId]
+	millisVal := stream.Map[millis]
+	entryMap := millisVal.Map[sequence]
 	assert.Equal(t, "95", entryMap["humidity"])
 	assert.Equal(t, "36", entryMap["temperature"])
 }
