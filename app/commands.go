@@ -345,6 +345,7 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 			"ERR Unknown Error",
 		}
 	}
+	id = fmt.Sprintf("%s-%s", millis, sequence)
 	return ReturnValue{
 		RBulkString,
 		id,
