@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,7 @@ func TestLrange_NegativeNos(t *testing.T) {
 		Conn:  &dConn,
 		State: NewState(),
 	}
-	lmap := *ctx.State.ListMap
+	lmap := ctx.State.ListMap
 	lvar := ListVariable{
 		Values: []string{"a", "b", "c", "d", "e"},
 	}
@@ -97,7 +98,7 @@ func TestLrangeBasic(t *testing.T) {
 		Conn:  &dConn,
 		State: NewState(),
 	}
-	lmap := *ctx.State.ListMap
+	lmap := ctx.State.ListMap
 	lvar := ListVariable{
 		Values: []string{"a", "b", "c", "d", "e"},
 	}
@@ -136,7 +137,7 @@ func TestLPush(t *testing.T) {
 		Conn:  &DummyConn{},
 		State: NewState(),
 	}
-	lMap := *ctx.State.ListMap
+	lMap := ctx.State.ListMap
 	list := []string{"1", "2", "3"}
 	lMap["list"] = &ListVariable{
 		Values: list,
@@ -154,7 +155,7 @@ func TestLlen(t *testing.T) {
 		Conn:  &DummyConn{},
 		State: NewState(),
 	}
-	lMap := *ctx.State.ListMap
+	lMap := ctx.State.ListMap
 	list := []string{"1", "2", "3"}
 	lMap["list"] = &ListVariable{
 		Values: list,
@@ -181,7 +182,7 @@ func TestXadd(t *testing.T) {
 	}
 	ret := Xadd(ctx, cmd)
 	assert.Equal(t, streamId, ret.EncoderArgs)
-	sMap := *ctx.State.StreamMap
+	sMap := ctx.State.StreamMap
 	stream, ok := sMap["stream_key"]
 	assert.True(t, ok) // ensure the stream key exists
 	millisVal := stream.Map[millis]
@@ -203,8 +204,8 @@ func TestXaddWithPartial(t *testing.T) {
 		[]string{"stream_key", streamId, "temperature", "36", "humidity", "95"},
 	}
 	ret := Xadd(ctx, cmd)
-	assert.Equal(t, streamId, ret.EncoderArgs)
-	sMap := *ctx.State.StreamMap
+	assert.True(t, strings.HasPrefix(ret.EncoderArgs.(string), millis))
+	sMap := ctx.State.StreamMap
 	stream, ok := sMap["stream_key"]
 	assert.True(t, ok) // ensure the stream key exists
 	millisVal := stream.Map[millis]

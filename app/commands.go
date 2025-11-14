@@ -26,7 +26,7 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 
 func Blpop(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
-	listMap := *ctx.State.ListMap
+	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
 	if !ok {
 		// create the list
@@ -100,7 +100,7 @@ func Set(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	(*ctx.State.VariableMap)[key] = Variable{
+	(ctx.State.VariableMap)[key] = Variable{
 		Value:              value,
 		SetAt:              time.Now().UnixMilli(),
 		ExpiryMilliseconds: expiryMilliseconds,
@@ -110,7 +110,7 @@ func Set(ctx *Context, cmd Command) ReturnValue {
 
 func Get(ctx *Context, cmd Command) ReturnValue {
 	key := cmd.Args[0]
-	value, ok := (*ctx.State.VariableMap)[key]
+	value, ok := (ctx.State.VariableMap)[key]
 	if ok {
 		isExpired := false
 		nowMillis := time.Now().UnixMilli()
@@ -129,7 +129,7 @@ func Get(ctx *Context, cmd Command) ReturnValue {
 
 func Llen(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
-	listMap := *ctx.State.ListMap
+	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
 	if !ok {
 		return ReturnValue{RInteger, 0}
@@ -139,7 +139,7 @@ func Llen(ctx *Context, cmd Command) ReturnValue {
 
 func Lpop(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
-	listMap := *ctx.State.ListMap
+	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
 	if !ok || len(list.Values) == 0 {
 		return ReturnValue{
@@ -161,7 +161,7 @@ func Lpop(ctx *Context, cmd Command) ReturnValue {
 
 func Lpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
-	listMap := *ctx.State.ListMap
+	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
 	if !ok {
 		list = &ListVariable{}
@@ -182,7 +182,7 @@ func Lpush(ctx *Context, cmd Command) ReturnValue {
 
 func Rpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
-	listMap := *ctx.State.ListMap
+	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
 	if !ok {
 		list = &ListVariable{}
@@ -214,7 +214,7 @@ func convertLrangeIndex(listSize int, index int) uint {
 
 func Lrange(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
-	listMap := *ctx.State.ListMap
+	listMap := ctx.State.ListMap
 	listVar, ok := listMap[listName]
 	if !ok {
 		return ReturnValue{RArray, []string{}}
@@ -260,7 +260,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 	// string, list, set, zset, hash, stream, vectorset
 	state := *ctx.State
 
-	varMap := *state.VariableMap
+	varMap := state.VariableMap
 	if _, ok := varMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -268,7 +268,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	lMap := *state.ListMap
+	lMap := state.ListMap
 	if _, ok := lMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -276,7 +276,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	streamMap := *state.StreamMap
+	streamMap := state.StreamMap
 	if _, ok := streamMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -352,6 +352,17 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 	}
 }
 
+// func XRange(ctx *Context, cmd Command) ReturnValue {
+// 	streamKey := cmd.Args[0]
+// 	fromId := cmd.Args[1]
+// 	toId := cmd.Args[1]
+//
+// 	return ReturnValue{
+// 		RSimpleError,
+// 		id,
+// 	}
+// }
+
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
 	"ECHO":   Echo,
@@ -365,4 +376,5 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"SET":    Set,
 	"TYPE":   Type,
 	"XADD":   Xadd,
+	// "XRANGE": XRange,
 }

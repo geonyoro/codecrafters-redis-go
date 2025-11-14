@@ -121,7 +121,7 @@ func (s *Stream) IsNewStreamIdValid(millis, sequence string) (bool, error) {
 }
 
 func (s *State) GetOrCreateStreamForKey(key string) *Stream {
-	streamMap := *s.StreamMap
+	streamMap := s.StreamMap
 	stream, ok := streamMap[key]
 	if ok {
 		return stream

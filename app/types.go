@@ -50,9 +50,9 @@ type Context struct {
 }
 
 type State struct {
-	VariableMap *map[string]Variable
-	ListMap     *map[string]*ListVariable
-	StreamMap   *map[string]*Stream
+	VariableMap map[string]Variable
+	ListMap     map[string]*ListVariable
+	StreamMap   map[string]*Stream
 }
 
 func NewState() *State {
@@ -60,8 +60,13 @@ func NewState() *State {
 	lMap := make(map[string]*ListVariable)
 	sMap := make(map[string]*Stream)
 	return &State{
-		VariableMap: &vMap,
-		ListMap:     &lMap,
-		StreamMap:   &sMap,
+		VariableMap: vMap,
+		ListMap:     lMap,
+		StreamMap:   sMap,
 	}
+}
+
+type XRangeReturn struct {
+	ID string
+	KV map[string]string
 }
