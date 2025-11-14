@@ -82,3 +82,19 @@ func (x XRangeReturn) ToRArray() (r []any) {
 	r = append(r, kvArray)
 	return r
 }
+
+type XReadReturn struct {
+	Stream  string
+	Entries []XRangeReturn
+}
+
+func (x XReadReturn) ToRArray() (r []any) {
+	r = make([]any, 0)
+	r = append(r, x.Stream)
+	kvArray := make([]any, 0)
+	for _, val := range x.Entries {
+		kvArray = append(kvArray, val.ToRArray())
+	}
+	r = append(r, kvArray)
+	return r
+}

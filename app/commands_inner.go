@@ -104,3 +104,19 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 
 	return ret
 }
+
+func xReadInner(ctx *Context, streamStarts map[string]string) (ret []XReadReturn) {
+	for streamId, fromId := range streamStarts {
+		streamEntries := make([]XRangeReturn, 0)
+		xrangeRets := xRangeInner(ctx, streamId, fromId, "+")
+		for _, xrangeRet := range xrangeRets {
+			streamEntries = append(streamEntries, xrangeRet)
+		}
+		streamRet := XReadReturn{
+			streamId,
+			streamEntries,
+		}
+		ret = append(ret, streamRet)
+	}
+	return ret
+}

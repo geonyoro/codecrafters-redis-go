@@ -372,6 +372,28 @@ func XRange(ctx *Context, cmd Command) ReturnValue {
 	}
 }
 
+func XRead(ctx *Context, cmd Command) ReturnValue {
+	if cmd.Args[0] != "streams" {
+		return ReturnValue{
+			RSimpleError,
+			"Expected first arg to be streams",
+		}
+	}
+	_ = ParseXReadArgs(cmd.Args)
+	startStreams := ParseXReadArgs(cmd.Args)
+
+	retArray := make([]any, 0)
+	rets := xReadInner(ctx, startStreams)
+	for _, ret := range rets {
+		retArray = append(retArray, ret.ToRArray())
+	}
+
+	return ReturnValue{
+		RArray,
+		retArray,
+	}
+}
+
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
 	"ECHO":   Echo,
@@ -386,4 +408,5 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"TYPE":   Type,
 	"XADD":   Xadd,
 	"XRANGE": XRange,
+	"XREAD":  XRead,
 }
