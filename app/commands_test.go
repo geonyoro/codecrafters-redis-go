@@ -43,37 +43,37 @@ func TestLrange_NegativeNos(t *testing.T) {
 		description string
 		index1      string
 		index2      string
-		output      []string
+		output      []any
 	}{
 		{
 			description: "last 2 elements",
 			index1:      "-2",
 			index2:      "-1",
-			output:      []string{"d", "e"},
+			output:      []any{"d", "e"},
 		},
 		{
 			description: "all elements except the last 2",
 			index1:      "0",
 			index2:      "-3",
-			output:      []string{"a", "b", "c"},
+			output:      []any{"a", "b", "c"},
 		},
 		{
 			description: "all elements with negative indexes",
 			index1:      "-5",
 			index2:      "-1",
-			output:      []string{"a", "b", "c", "d", "e"},
+			output:      []any{"a", "b", "c", "d", "e"},
 		},
 		{
 			description: "all elements with out of bound negatives",
 			index1:      "-6",
 			index2:      "-1",
-			output:      []string{"a", "b", "c", "d", "e"},
+			output:      []any{"a", "b", "c", "d", "e"},
 		},
 		{
 			description: "all elements with out of bound negatives and bigger",
 			index1:      "-6",
 			index2:      "-7",
-			output:      []string{},
+			output:      []any{},
 		},
 	}
 
@@ -109,7 +109,7 @@ func TestLrangeBasic(t *testing.T) {
 	}
 
 	output := Lrange(ctx, cmd)
-	assert.Equal(t, []string{"b", "c"}, output.EncoderArgs)
+	assert.Equal(t, []any{"b", "c"}, output.EncoderArgs)
 }
 
 func TestConvertLrangeIndex(t *testing.T) {

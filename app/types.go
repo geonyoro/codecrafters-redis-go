@@ -20,12 +20,12 @@ type (
 	SequenceKV map[string]string // maps a key to a value
 	MillisVal  struct {
 		Map  map[string]SequenceKV // maps a sequenceId to Entry
-		Keys []string              // stored as sorted list of ints
+		Keys []string              // stored as sorted list
 		Last int                   // latest
 	}
 	Stream struct {
 		Map  map[string]*MillisVal // maps streamId to the StreamValue
-		Keys []string              // stored as sorted list of ints
+		Keys []string              // stored as sorted list
 		Last int                   // latest
 	}
 )
@@ -69,4 +69,16 @@ func NewState() *State {
 type XRangeReturn struct {
 	ID string
 	KV map[string]string
+}
+
+func (x XRangeReturn) ToRArray() (r []any) {
+	r = make([]any, 0)
+	r = append(r, x.ID)
+	kvArray := make([]any, 0)
+	for key, val := range x.KV {
+		kvArray = append(kvArray, key)
+		kvArray = append(kvArray, val)
+	}
+	r = append(r, kvArray)
+	return r
 }

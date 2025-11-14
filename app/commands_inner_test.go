@@ -1,11 +1,80 @@
 package main
 
-// func TestXrangeInnerWithSequence(t *testing.T) {
-// 	d := DummyConn{}
-// 	ctx := &Context{
-// 		Conn:  &d,
-// 		State: NewState(),
-// 	}
-// 	// ctx.State.StreamMap
-// 	// xRangeInner(ctx)
-// }
+import (
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestXrangeInnerWithSequence(t *testing.T) {
+	type testCase struct {
+		From string
+		To   string
+		Ret  []XRangeReturn
+	}
+	d := DummyConn{}
+	ctx := &Context{
+		Conn:  &d,
+		State: NewState(),
+	}
+	stream := NewStream()
+	streamId := "myStream"
+	ctx.State.StreamMap[streamId] = stream
+	// assumes this method has been thoroughly tested
+	stream.AddIdWithKV("1", "0", map[string]string{
+		"a": "1",
+		"b": "2",
+	})
+	stream.AddIdWithKV("1", "2", map[string]string{
+		"a": "3",
+		"b": "4",
+	})
+	stream.AddIdWithKV("2", "3", map[string]string{
+		"c": "5",
+		"d": "6",
+	})
+	stream.AddIdWithKV("4", "0", map[string]string{
+		"a": "7",
+		"b": "8",
+	})
+	for _, testCase := range []testCase{
+		{
+			From: "1-0", To: "1-1", Ret: []XRangeReturn{
+				{
+					ID: "1-0", KV: map[string]string{"a": "1", "b": "2"},
+				},
+			},
+		},
+		{
+			From: "1-1", To: "1-2", Ret: []XRangeReturn{
+				{
+					ID: "1-2", KV: map[string]string{"a": "3", "b": "4"},
+				},
+			},
+		},
+		{
+			From: "2-0", To: "3-0", Ret: []XRangeReturn{
+				{
+					ID: "2-3", KV: map[string]string{"c": "5", "d": "6"},
+				},
+			},
+		},
+		{
+			From: "2-0", To: "4-0", Ret: []XRangeReturn{
+				{
+					ID: "2-3", KV: map[string]string{"c": "5", "d": "6"},
+				},
+				{
+					ID: "4-0", KV: map[string]string{"a": "7", "b": "8"},
+				},
+			},
+		},
+	} {
+		description := fmt.Sprintf("From:%s To:%s", testCase.From, testCase.To)
+		t.Run(description, func(t *testing.T) {
+			ret := xRangeInner(ctx, streamId, testCase.From, testCase.To)
+			assert.Equal(t, testCase.Ret, ret)
+		})
+	}
+}

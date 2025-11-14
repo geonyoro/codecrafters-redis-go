@@ -52,7 +52,7 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 			list.Values = list.Values[1:len(list.Values)]
 			return ReturnValue{
 				Encoder:     RArray,
-				EncoderArgs: []string{listName, elem},
+				EncoderArgs: []any{listName, elem},
 			}
 		}
 		if timeout > 0 {
@@ -156,7 +156,7 @@ func Lpop(ctx *Context, cmd Command) ReturnValue {
 	size, _ := strconv.Atoi(cmd.Args[1])
 	values := list.Values[:size]
 	list.Values = list.Values[size:]
-	return ReturnValue{RArray, values}
+	return ReturnValue{RArray, StringArraytoAny(values)}
 }
 
 func Lpush(ctx *Context, cmd Command) ReturnValue {
@@ -217,7 +217,7 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 	listMap := ctx.State.ListMap
 	listVar, ok := listMap[listName]
 	if !ok {
-		return ReturnValue{RArray, []string{}}
+		return ReturnValue{RArray, []any{}}
 	}
 	listSize := len(listVar.Values)
 	// access the indexes
@@ -240,7 +240,7 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 	if !ok || startIndex >= endIndex {
-		output := []string{}
+		output := []any{}
 		return ReturnValue{RArray, output}
 	}
 	if endIndex >= listSize {
@@ -252,7 +252,7 @@ func Lrange(ctx *Context, cmd Command) ReturnValue {
 	for i := range accessSize {
 		values[i] = listVar.Values[i+startIndex]
 	}
-	return ReturnValue{RArray, values}
+	return ReturnValue{RArray, StringArraytoAny(values)}
 }
 
 func Type(ctx *Context, cmd Command) ReturnValue {
@@ -352,16 +352,22 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 	}
 }
 
-// func XRange(ctx *Context, cmd Command) ReturnValue {
-// 	streamKey := cmd.Args[0]
-// 	fromId := cmd.Args[1]
-// 	toId := cmd.Args[1]
-//
-// 	return ReturnValue{
-// 		RSimpleError,
-// 		id,
-// 	}
-// }
+func XRange(ctx *Context, cmd Command) ReturnValue {
+	streamKey := cmd.Args[0]
+	fromId := cmd.Args[1]
+	toId := cmd.Args[1]
+
+	retArray := make([]any, 0)
+	rets := xRangeInner(ctx, streamKey, fromId, toId)
+	for _, ret := range rets {
+		retArray = append(retArray, ret.ToRArray()...)
+	}
+
+	return ReturnValue{
+		RArray,
+		retArray,
+	}
+}
 
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
