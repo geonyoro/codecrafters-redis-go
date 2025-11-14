@@ -382,5 +382,5 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"SET":    Set,
 	"TYPE":   Type,
 	"XADD":   Xadd,
-	// "XRANGE": XRange,
+	"XRANGE": XRange,
 }
