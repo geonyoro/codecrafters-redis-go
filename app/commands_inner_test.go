@@ -44,6 +44,16 @@ func TestXrangeInnerWithSequence(t *testing.T) {
 	})
 	for _, testCase := range []testCase{
 		{
+			From: "-", To: "1-1", Ret: []XRangeReturn{
+				{
+					ID: "1-0", KV: map[string]string{"a": "1", "b": "2"},
+				},
+				{
+					ID: "1-1", KV: map[string]string{"x": "9", "y": "0"},
+				},
+			},
+		},
+		{
 			From: "1-0", To: "1-1", Ret: []XRangeReturn{
 				{
 					ID: "1-0", KV: map[string]string{"a": "1", "b": "2"},
@@ -75,6 +85,13 @@ func TestXrangeInnerWithSequence(t *testing.T) {
 				{
 					ID: "2-3", KV: map[string]string{"c": "5", "d": "6"},
 				},
+				{
+					ID: "4-0", KV: map[string]string{"a": "7", "b": "8"},
+				},
+			},
+		},
+		{
+			From: "3-0", To: "+", Ret: []XRangeReturn{
 				{
 					ID: "4-0", KV: map[string]string{"a": "7", "b": "8"},
 				},

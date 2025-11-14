@@ -15,18 +15,26 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 
 	// convert the from section
 	var fromMillis, fromSequence int
-	fromParts := strings.Split(fromId, "-")
-	fromMillis, _ = strconv.Atoi(fromParts[0])
-	if len(fromParts) > 1 {
-		fromSequence, _ = strconv.Atoi(fromParts[1])
+	if toId == "-" {
+		fromMillis = 0
+	} else {
+		fromParts := strings.Split(fromId, "-")
+		fromMillis, _ = strconv.Atoi(fromParts[0])
+		if len(fromParts) > 1 {
+			fromSequence, _ = strconv.Atoi(fromParts[1])
+		}
 	}
 
 	// convert the to section
 	var toMillis, toSequence int
-	toParts := strings.Split(toId, "-")
-	toMillis, _ = strconv.Atoi(toParts[0])
-	if len(toParts) > 1 {
-		toSequence, _ = strconv.Atoi(toParts[1])
+	if toId == "+" {
+		toMillis = stream.Last
+	} else {
+		toParts := strings.Split(toId, "-")
+		toMillis, _ = strconv.Atoi(toParts[0])
+		if len(toParts) > 1 {
+			toSequence, _ = strconv.Atoi(toParts[1])
+		}
 	}
 
 	for _, keyStr := range stream.Keys {
