@@ -355,7 +355,7 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 func XRange(ctx *Context, cmd Command) ReturnValue {
 	streamKey := cmd.Args[0]
 	fromId := cmd.Args[1]
-	toId := cmd.Args[1]
+	toId := cmd.Args[2]
 
 	retArray := make([]any, 0)
 	rets := xRangeInner(ctx, streamKey, fromId, toId)
