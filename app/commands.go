@@ -32,6 +32,7 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 		// create the list
 		list = &ListVariable{}
 		listMap[listName] = list
+		ctx.State.ListMap = listMap
 	}
 
 	// access timeout
@@ -151,7 +152,7 @@ func Lpop(ctx *Context, cmd Command) ReturnValue {
 		// remove a single value
 		value := list.Values[0]
 		list.Values = list.Values[1:len(list.Values)]
-		return ReturnValue{RSimpleString, value}
+		return ReturnValue{RBulkString, value}
 	}
 	size, _ := strconv.Atoi(cmd.Args[1])
 	values := list.Values[:size]
@@ -166,6 +167,7 @@ func Lpush(ctx *Context, cmd Command) ReturnValue {
 	if !ok {
 		list = &ListVariable{}
 		listMap[listName] = list
+		ctx.State.ListMap = listMap
 	}
 	argSize := len(cmd.Args) - 1
 	newList := make([]string, argSize)
@@ -187,6 +189,7 @@ func Rpush(ctx *Context, cmd Command) ReturnValue {
 	if !ok {
 		list = &ListVariable{}
 		listMap[listName] = list
+		ctx.State.ListMap = listMap
 	}
 	for i := 1; i < len(cmd.Args); i++ {
 		newValue := cmd.Args[i]
@@ -360,7 +363,7 @@ func XRange(ctx *Context, cmd Command) ReturnValue {
 	retArray := make([]any, 0)
 	rets := xRangeInner(ctx, streamKey, fromId, toId)
 	for _, ret := range rets {
-		retArray = append(retArray, ret.ToRArray()...)
+		retArray = append(retArray, ret.ToRArray())
 	}
 
 	return ReturnValue{
