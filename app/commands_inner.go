@@ -29,6 +29,8 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 	var toMillis, toSequence int
 	if toId == "+" {
 		toMillis = stream.Last
+		millisVal := stream.Map[strconv.Itoa(toMillis)]
+		toSequence = millisVal.Last
 	} else {
 		toParts := strings.Split(toId, "-")
 		toMillis, _ = strconv.Atoi(toParts[0])
