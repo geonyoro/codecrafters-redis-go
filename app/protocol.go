@@ -56,12 +56,10 @@ func RArray(arg any) []byte {
 			output = append(output, RInteger(e)...)
 		case []any:
 			ret := RArray(e)
-			fmt.Printf("%q\n", string(ret))
 			output = append(output, ret...)
 		default:
 			panic(fmt.Sprintf("Unknown type: %T", elem))
 		}
 	}
-	fmt.Printf("%q\n", string(output))
 	return []byte(output)
 }
