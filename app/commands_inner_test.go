@@ -42,6 +42,9 @@ func TestXrangeInnerWithSequence(t *testing.T) {
 		"a": "7",
 		"b": "8",
 	})
+	stream.AddIdWithKV("4", "4", map[string]string{
+		"a": "2",
+	})
 	for _, testCase := range []testCase{
 		{
 			From: "-", To: "1-1", Ret: []XRangeReturn{
@@ -94,6 +97,9 @@ func TestXrangeInnerWithSequence(t *testing.T) {
 			From: "3-0", To: "+", Ret: []XRangeReturn{
 				{
 					ID: "4-0", KV: map[string]string{"a": "7", "b": "8"},
+				},
+				{
+					ID: "4-4", KV: map[string]string{"a": "2"},
 				},
 			},
 		},
