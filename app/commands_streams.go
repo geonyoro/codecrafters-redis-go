@@ -110,9 +110,10 @@ func XRead(ctx *Context, cmd Command) ReturnValue {
 }
 
 type XReadArgs struct {
-	Streams map[string]string
-	Count   int
-	Block   int
+	Streams    map[string]string
+	Count      int
+	Block      int
+	IsBlocking bool
 }
 
 func ParseXReadArgs(args []string) (XReadArgs, error) {
@@ -123,6 +124,7 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 	size := len(args)
 	var count int
 	var block int
+	isBlocking := false
 	isStreamLiteralSeen := false
 	streamStartsAt := 0
 	for i := 0; ; i++ { // go until you hit the streams section
@@ -138,6 +140,7 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 				count = val
 			} else {
 				block = val
+				isBlocking = true
 			}
 			continue
 		}
@@ -162,23 +165,27 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 	}
 
 	return XReadArgs{
-		Streams: streams,
-		Count:   count,
-		Block:   block,
+		Streams:    streams,
+		Count:      count,
+		Block:      block,
+		IsBlocking: isBlocking,
 	}, nil
 }
 
 func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn, isNilArray bool) {
 	for streamId, fromId := range args.Streams {
 		streamEntries := make([]XRangeReturn, 0)
-		fromId, err := incFromId(ctx, fromId, args.Block)
+		fromId, err := incFromId(ctx, fromId)
 		if err != nil {
 			panic(err)
 		}
 		xrangeRets := xRangeInner(ctx, streamId, fromId, "+")
-		if args.Block > 0 && len(xrangeRets) <= 0 {
+		if args.IsBlocking && len(xrangeRets) <= 0 {
 			// poll the stream every Block milliseconds
-			timerExpiry := time.NewTimer(time.Duration(args.Block) * time.Millisecond)
+			var timerExpiry *time.Timer
+			if args.Block > 0 {
+				timerExpiry = time.NewTimer(time.Duration(args.Block) * time.Millisecond)
+			}
 			// 10ms ticker
 			ticker := time.NewTicker(10 * time.Millisecond)
 
@@ -191,10 +198,16 @@ func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn, isNilArray boo
 						ticker.Stop()
 						break CheckLoop
 					}
-				case <-timerExpiry.C:
-					// the timer has expired
-					ticker.Stop()
-					break CheckLoop
+				default:
+				}
+				if args.Block > 0 {
+					select {
+					case <-timerExpiry.C:
+						// the timer has expired
+						ticker.Stop()
+						break CheckLoop
+					default:
+					}
 				}
 			}
 			if len(xrangeRets) == 0 {
@@ -305,7 +318,7 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 	return ret
 }
 
-func incFromId(ctx *Context, fromId string, blockMillis int) (string, error) {
+func incFromId(ctx *Context, fromId string) (string, error) {
 	millis, sequence := toMillisSeq(fromId)
 	return fmt.Sprintf("%d-%d", millis, sequence+1), nil
 }
