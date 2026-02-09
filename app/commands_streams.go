@@ -175,7 +175,8 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn, isNilArray bool) {
 	for streamId, fromId := range args.Streams {
 		streamEntries := make([]XRangeReturn, 0)
-		fromId, err := incFromId(ctx, fromId)
+		stream := ctx.State.StreamMap[streamId]
+		fromId, err := incFromId(fromId, stream)
 		if err != nil {
 			panic(err)
 		}
@@ -200,6 +201,7 @@ func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn, isNilArray boo
 					}
 				default:
 				}
+
 				if args.Block > 0 {
 					select {
 					case <-timerExpiry.C:
@@ -245,9 +247,7 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 	// convert the to section
 	var toMillis, toSequence int
 	if toId == "+" {
-		toMillis = stream.Last
-		millisVal := stream.Map[strconv.Itoa(toMillis)]
-		toSequence = millisVal.Last
+		toMillis, toSequence = stream.GetLastMillisSequence()
 	} else {
 		toMillis, toSequence = toMillisSeq(toId)
 	}
@@ -318,8 +318,16 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 	return ret
 }
 
-func incFromId(ctx *Context, fromId string) (string, error) {
-	millis, sequence := toMillisSeq(fromId)
+func incFromId(fromId string, stream *Stream) (string, error) {
+	var millis, sequence int
+	if fromId == "$" {
+		if stream == nil {
+			return "0-0", nil
+		}
+		millis, sequence = stream.GetLastMillisSequence()
+	} else {
+		millis, sequence = toMillisSeq(fromId)
+	}
 	return fmt.Sprintf("%d-%d", millis, sequence+1), nil
 }
 

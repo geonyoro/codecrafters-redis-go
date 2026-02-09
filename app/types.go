@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"strconv"
 	"sync"
 )
 
@@ -29,6 +30,13 @@ type (
 		Last int                   // latest
 	}
 )
+
+func (s *Stream) GetLastMillisSequence() (int, int) {
+	toMillis := s.Last
+	millisVal := s.Map[strconv.Itoa(toMillis)]
+	toSequence := millisVal.Last
+	return toMillis, toSequence
+}
 
 func NewMillisVal() *MillisVal {
 	return &MillisVal{
