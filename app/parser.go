@@ -34,19 +34,3 @@ func ParseInput(input string) (Command, error) {
 		Args:    args,
 	}, nil
 }
-
-func ParseXReadArgs(args []string) map[string]string {
-	// a,b,c,1,2,3
-	// 0,1,2,3,4,5
-	size := len(args) - 1
-	startStreams := make(map[string]string)
-	half := size / 2
-	for tIdx := range half {
-		keyIdx := tIdx + 1
-		valIdx := keyIdx + half
-		key := args[keyIdx]
-		val := args[valIdx]
-		startStreams[key] = val
-	}
-	return startStreams
-}

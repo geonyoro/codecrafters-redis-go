@@ -10,6 +10,17 @@ event loops, the Redis protocol and more.
 **Note**: If you're viewing this repo on GitHub, head over to
 [codecrafters.io](https://codecrafters.io) to try the challenge.
 
+# Testing
+Run 
+```sh
+go test ./app
+```
+
+Run a specific test with:
+```sh
+go test ./app -run WBlock_WCount
+```
+
 # Passing the first stage
 
 The entry point for your Redis implementation is in `app/main.go`. Study and

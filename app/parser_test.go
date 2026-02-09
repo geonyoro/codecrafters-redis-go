@@ -16,13 +16,3 @@ func TestParseInput(t *testing.T) {
 		},
 	})
 }
-
-func TestParseXReadArgs(t *testing.T) {
-	actual := ParseXReadArgs([]string{
-		"streams", "stream_key", "other_stream_key", "0-0", "0-1",
-	})
-	assert.Equal(t, map[string]string{
-		"stream_key":       "0-0",
-		"other_stream_key": "0-1",
-	}, actual)
-}
