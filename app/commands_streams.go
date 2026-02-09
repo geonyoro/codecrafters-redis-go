@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func Xadd(ctx *Context, cmd Command) ReturnValue {
@@ -94,7 +95,7 @@ func XRead(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 	retArray := make([]any, 0)
-	rets := xReadInner(ctx, args.Streams)
+	rets := xReadInner(ctx, args)
 	for _, ret := range rets {
 		retArray = append(retArray, ret.ToRArray())
 	}
@@ -164,10 +165,31 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 	}, nil
 }
 
-func xReadInner(ctx *Context, streamStarts map[string]string) (ret []XReadReturn) {
-	for streamId, fromId := range streamStarts {
+func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn) {
+	for streamId, fromId := range args.Streams {
 		streamEntries := make([]XRangeReturn, 0)
 		xrangeRets := xRangeInner(ctx, streamId, fromId, "+")
+		if args.Block > 0 && len(xrangeRets) <= 0 {
+			// poll the stream every Block milliseconds
+			timerExpiry := time.NewTimer(time.Duration(args.Block) * time.Millisecond)
+			// 10ms ticker
+			ticker := time.NewTicker(10 * time.Millisecond)
+		CheckLoop:
+			for {
+				select {
+				case <-ticker.C:
+					xrangeRets = xRangeInner(ctx, streamId, fromId, "+")
+					if len(xrangeRets) > 0 {
+						ticker.Stop()
+						break CheckLoop
+					}
+				case <-timerExpiry.C:
+					// the timer has expired
+					ticker.Stop()
+					break CheckLoop
+				}
+			}
+		}
 		for _, xrangeRet := range xrangeRets {
 			streamEntries = append(streamEntries, xrangeRet)
 		}
