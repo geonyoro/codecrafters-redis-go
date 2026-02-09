@@ -168,12 +168,17 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn) {
 	for streamId, fromId := range args.Streams {
 		streamEntries := make([]XRangeReturn, 0)
+		fromId, err := incFromId(ctx, fromId, args.Block)
+		if err != nil {
+			panic(err)
+		}
 		xrangeRets := xRangeInner(ctx, streamId, fromId, "+")
 		if args.Block > 0 && len(xrangeRets) <= 0 {
 			// poll the stream every Block milliseconds
 			timerExpiry := time.NewTimer(time.Duration(args.Block) * time.Millisecond)
 			// 10ms ticker
 			ticker := time.NewTicker(10 * time.Millisecond)
+
 		CheckLoop:
 			for {
 				select {
@@ -211,14 +216,10 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 
 	// convert the from section
 	var fromMillis, fromSequence int
-	if toId == "-" {
+	if fromId == "-" {
 		fromMillis = 0
 	} else {
-		fromParts := strings.Split(fromId, "-")
-		fromMillis, _ = strconv.Atoi(fromParts[0])
-		if len(fromParts) > 1 {
-			fromSequence, _ = strconv.Atoi(fromParts[1])
-		}
+		fromMillis, fromSequence = toMillisSeq(fromId)
 	}
 
 	// convert the to section
@@ -228,11 +229,7 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 		millisVal := stream.Map[strconv.Itoa(toMillis)]
 		toSequence = millisVal.Last
 	} else {
-		toParts := strings.Split(toId, "-")
-		toMillis, _ = strconv.Atoi(toParts[0])
-		if len(toParts) > 1 {
-			toSequence, _ = strconv.Atoi(toParts[1])
-		}
+		toMillis, toSequence = toMillisSeq(toId)
 	}
 
 	for _, keyStr := range stream.Keys {
@@ -299,4 +296,19 @@ func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeRetur
 	}
 
 	return ret
+}
+
+func incFromId(ctx *Context, fromId string, blockMillis int) (string, error) {
+	millis, sequence := toMillisSeq(fromId)
+	return fmt.Sprintf("%d-%d", millis, sequence+1), nil
+}
+
+func toMillisSeq(id string) (int, int) {
+	Parts := strings.Split(id, "-")
+	var millis, sequence int
+	millis, _ = strconv.Atoi(Parts[0])
+	if len(Parts) > 1 {
+		sequence, _ = strconv.Atoi(Parts[1])
+	}
+	return millis, sequence
 }
