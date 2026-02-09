@@ -112,26 +112,6 @@ func TestLrangeBasic(t *testing.T) {
 	assert.Equal(t, []any{"b", "c"}, output.EncoderArgs)
 }
 
-func TestConvertLrangeIndex(t *testing.T) {
-	for _, testCase := range []struct {
-		listSize int
-		index    int
-		output   uint
-	}{
-		{listSize: 5, index: 0, output: 0},
-		{listSize: 5, index: 4, output: 4},
-		{listSize: 5, index: 5, output: 4},
-		{listSize: 5, index: -1, output: 4},
-		{listSize: 5, index: -5, output: 0},
-		{listSize: 5, index: -6, output: 0},
-	} {
-		t.Run(fmt.Sprintf("%#v", testCase), func(t *testing.T) {
-			output := convertLrangeIndex(testCase.listSize, testCase.index)
-			assert.Equal(t, testCase.output, output)
-		})
-	}
-}
-
 func TestLPush(t *testing.T) {
 	ctx := &Context{
 		Conn:  &DummyConn{},

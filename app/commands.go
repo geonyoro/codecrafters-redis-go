@@ -198,23 +198,6 @@ func Rpush(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RInteger, len(list.Values)}
 }
 
-func convertLrangeIndex(listSize int, index int) uint {
-	maxNegativeIndex := 0 - listSize
-	// manipulate the indexes
-	if index < 0 {
-		if index < maxNegativeIndex {
-			index = 0
-		} else {
-			index = listSize + index
-		}
-	} else {
-		if index >= listSize {
-			index = listSize - 1
-		}
-	}
-	return uint(index)
-}
-
 func Lrange(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
@@ -290,85 +273,6 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{
 		RSimpleString,
 		"none",
-	}
-}
-
-func Xadd(ctx *Context, cmd Command) ReturnValue {
-	streamKey := cmd.Args[0]
-	stream := ctx.State.GetOrCreateStreamForKey(streamKey)
-
-	id := cmd.Args[1]
-	if id == "0-0" {
-		return ReturnValue{
-			RSimpleError,
-			"ERR The ID specified in XADD must be greater than 0-0",
-		}
-	}
-
-	var millis, sequence string
-	if id == "*" {
-		// full generation mode
-		millis = stream.GenerateMillis()
-		sequence = stream.GenerateSequence(millis)
-	} else {
-		stringParts := strings.Split(id, "-")
-		millis = stringParts[0]
-		sequence = stringParts[1]
-		isValid, err := stream.IsNewStreamIdValid(millis, sequence)
-		if err != nil {
-			return ReturnValue{
-				RSimpleError,
-				"ERR Unknown Error",
-			}
-		}
-		if !isValid {
-			return ReturnValue{
-				RSimpleError,
-				"ERR The ID specified in XADD is equal or smaller than the target stream top item",
-			}
-		}
-
-		if sequence == "*" {
-			sequence = stream.GenerateSequence(millis)
-		}
-	}
-
-	// first 2 entries are taken by stream and id
-	// iterate in batches of 2
-	kvMap := make(map[string]string)
-	for i := range (len(cmd.Args) - 2) / 2 {
-		idx := (i + 1) * 2
-		key, value := cmd.Args[idx], cmd.Args[idx+1]
-		kvMap[key] = value
-	}
-	err := stream.AddIdWithKV(millis, sequence, kvMap)
-	if err != nil {
-		return ReturnValue{
-			RSimpleError,
-			"ERR Unknown Error",
-		}
-	}
-	id = fmt.Sprintf("%s-%s", millis, sequence)
-	return ReturnValue{
-		RBulkString,
-		id,
-	}
-}
-
-func XRange(ctx *Context, cmd Command) ReturnValue {
-	streamKey := cmd.Args[0]
-	fromId := cmd.Args[1]
-	toId := cmd.Args[2]
-
-	retArray := make([]any, 0)
-	rets := xRangeInner(ctx, streamKey, fromId, toId)
-	for _, ret := range rets {
-		retArray = append(retArray, ret.ToRArray())
-	}
-
-	return ReturnValue{
-		RArray,
-		retArray,
 	}
 }
 
