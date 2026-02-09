@@ -95,7 +95,10 @@ func XRead(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 	retArray := make([]any, 0)
-	rets := xReadInner(ctx, args)
+	rets, isNilArray := xReadInner(ctx, args)
+	if isNilArray {
+		return ReturnValue{RNullArray, 1}
+	}
 	for _, ret := range rets {
 		retArray = append(retArray, ret.ToRArray())
 	}
@@ -165,7 +168,7 @@ func ParseXReadArgs(args []string) (XReadArgs, error) {
 	}, nil
 }
 
-func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn) {
+func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn, isNilArray bool) {
 	for streamId, fromId := range args.Streams {
 		streamEntries := make([]XRangeReturn, 0)
 		fromId, err := incFromId(ctx, fromId, args.Block)
@@ -194,6 +197,10 @@ func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn) {
 					break CheckLoop
 				}
 			}
+			if len(xrangeRets) == 0 {
+				// we have to respond with a nil array
+				return []XReadReturn{}, true
+			}
 		}
 		for _, xrangeRet := range xrangeRets {
 			streamEntries = append(streamEntries, xrangeRet)
@@ -204,7 +211,7 @@ func xReadInner(ctx *Context, args XReadArgs) (ret []XReadReturn) {
 		}
 		ret = append(ret, streamRet)
 	}
-	return ret
+	return ret, false
 }
 
 func xRangeInner(ctx *Context, streamId, fromId, toId string) (ret []XRangeReturn) {

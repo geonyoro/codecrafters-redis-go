@@ -182,7 +182,9 @@ func TestXreadInner(t *testing.T) {
 	} {
 		description := fmt.Sprintf("%#v", testCase.StreamStart)
 		t.Run(description, func(t *testing.T) {
-			ret := xReadInner(ctx, testCase.StreamStart)
+			args := XReadArgs{Streams: testCase.StreamStart}
+			ret, isNilArray := xReadInner(ctx, args)
+			assert.False(t, isNilArray)
 			assert.Equal(t, testCase.Ret, ret)
 		})
 	}
