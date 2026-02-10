@@ -58,9 +58,11 @@ type Context struct {
 }
 
 type State struct {
+	IsMulti     bool
 	VariableMap map[string]Variable
 	ListMap     map[string]*ListVariable
 	StreamMap   map[string]*Stream
+	MultiCmds   []Command
 }
 
 func NewState() *State {
@@ -71,6 +73,7 @@ func NewState() *State {
 		VariableMap: vMap,
 		ListMap:     lMap,
 		StreamMap:   sMap,
+		MultiCmds:   make([]Command, 0),
 	}
 }
 

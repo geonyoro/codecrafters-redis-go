@@ -140,6 +140,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
 	"ECHO":   Echo,
+	"EXEC":   Exec,
 	"GET":    Get,
 	"INCR":   Incr,
 	"LRANGE": Lrange,
@@ -147,6 +148,7 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"LLEN":   Llen,
 	"LPOP":   Lpop,
 	"LPUSH":  Lpush,
+	"MULTI":  Multi,
 	"RPUSH":  Rpush,
 	"SET":    Set,
 	"TYPE":   Type,
