@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -24,6 +25,65 @@ func (d *DummyConn) Write(p []byte) (n int, err error) {
 
 func (d *DummyConn) Close() error {
 	return nil
+}
+
+func TestIncr_WithExistantValue(t *testing.T) {
+	ctx := &Context{
+		Conn:  &DummyConn{},
+		State: NewState(),
+	}
+	key := "x"
+	(ctx.State.VariableMap)[key] = Variable{
+		Value: "1",
+		SetAt: time.Now().UnixMilli(),
+	}
+
+	// perform the increase
+	cmd := Command{
+		"INCR",
+		[]string{key},
+	}
+	ret := Incr(ctx, cmd)
+	assert.Equal(t, 2, ret.EncoderArgs)
+
+	// again yields 3
+	ret = Incr(ctx, cmd)
+	assert.Equal(t, 3, ret.EncoderArgs)
+}
+
+func TestIncr_WithInexistantValue(t *testing.T) {
+	ctx := &Context{
+		Conn:  &DummyConn{},
+		State: NewState(),
+	}
+	key := "x"
+	// perform the increase
+	cmd := Command{
+		"INCR",
+		[]string{key},
+	}
+	ret := Incr(ctx, cmd)
+	assert.Equal(t, 1, ret.EncoderArgs)
+}
+
+func TestIncr_WithNonNumericValue(t *testing.T) {
+	ctx := &Context{
+		Conn:  &DummyConn{},
+		State: NewState(),
+	}
+	key := "x"
+	(ctx.State.VariableMap)[key] = Variable{
+		Value: "y",
+		SetAt: time.Now().UnixMilli(),
+	}
+
+	// perform the increase
+	cmd := Command{
+		"INCR",
+		[]string{key},
+	}
+	ret := Incr(ctx, cmd)
+	assert.Equal(t, ErrorIncr, ret.EncoderArgs)
 }
 
 func TestXadd(t *testing.T) {

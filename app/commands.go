@@ -29,6 +29,44 @@ func Echo(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RBulkString, output}
 }
 
+func Get(ctx *Context, cmd Command) ReturnValue {
+	key := cmd.Args[0]
+	value, ok := (ctx.State.VariableMap)[key]
+	if ok {
+		isExpired := false
+		nowMillis := time.Now().UnixMilli()
+		if value.ExpiryMilliseconds > 0 {
+			expiresAt := value.SetAt + value.ExpiryMilliseconds
+			if expiresAt <= nowMillis {
+				isExpired = true
+			}
+		}
+		if !isExpired {
+			return ReturnValue{RBulkString, value.Value}
+		}
+	}
+	return ReturnValue{RNullBulkString, nil}
+}
+
+func Incr(ctx *Context, cmd Command) ReturnValue {
+	key := cmd.Args[0]
+	strVal, ok := (ctx.State.VariableMap)[key]
+	var (
+		val int
+		err error
+	)
+	if ok {
+		val, err = strconv.Atoi(strVal.Value)
+		if err != nil {
+			return ReturnValue{RSimpleError, ErrorIncr}
+		}
+	} // otherwise the value is starts at 0
+	val += 1
+	strVal.Value = strconv.Itoa(val)
+	ctx.State.VariableMap[key] = strVal
+	return ReturnValue{RInteger, val}
+}
+
 func Ping(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RSimpleString, "PONG"}
 }
@@ -62,44 +100,6 @@ func Set(ctx *Context, cmd Command) ReturnValue {
 		ExpiryMilliseconds: expiryMilliseconds,
 	}
 	return ReturnValue{RSimpleString, "OK"}
-}
-
-func Get(ctx *Context, cmd Command) ReturnValue {
-	key := cmd.Args[0]
-	value, ok := (ctx.State.VariableMap)[key]
-	if ok {
-		isExpired := false
-		nowMillis := time.Now().UnixMilli()
-		if value.ExpiryMilliseconds > 0 {
-			expiresAt := value.SetAt + value.ExpiryMilliseconds
-			if expiresAt <= nowMillis {
-				isExpired = true
-			}
-		}
-		if !isExpired {
-			return ReturnValue{RBulkString, value.Value}
-		}
-	}
-	return ReturnValue{RNullBulkString, nil}
-}
-
-func Incr(ctx *Context, cmd Command) ReturnValue {
-	key := cmd.Args[0]
-	strVal, ok := (ctx.State.VariableMap)[key]
-	var (
-		val int
-		err error
-	)
-	if ok {
-		val, err = strconv.Atoi(strVal.Value)
-		if err != nil {
-			return ReturnValue{RSimpleError, "ERR value is not an integer or out of range"}
-		}
-	} // otherwise the value is starts at 0
-	val += 1
-	strVal.Value = strconv.Itoa(val)
-	ctx.State.VariableMap[key] = strVal
-	return ReturnValue{RInteger, val}
 }
 
 func Type(ctx *Context, cmd Command) ReturnValue {
