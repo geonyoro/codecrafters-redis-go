@@ -2,6 +2,19 @@ package main
 
 import "strings"
 
+func Discard(ctx *Context, cmd Command) ReturnValue {
+	if !ctx.State.IsMulti {
+		return ReturnValue{
+			RSimpleError,
+			ErrorDiscardNoMulti,
+		}
+	}
+	return ReturnValue{
+		RSimpleString,
+		"OK",
+	}
+}
+
 func Exec(ctx *Context, cmd Command) ReturnValue {
 	if !ctx.State.IsMulti {
 		return ReturnValue{
