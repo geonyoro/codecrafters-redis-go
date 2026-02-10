@@ -9,18 +9,17 @@ func Exec(ctx *Context, cmd Command) ReturnValue {
 			ErrorMultiWithoutExec,
 		}
 	}
+	returnVals := make([]any, 0)
+	// execute each of the commands
+	for _, cmd := range ctx.State.MultiCmds {
+		ret := cmd.Callable(ctx, Command{Args: cmd.Args})
+		returnVals = append(returnVals, ret)
+	}
 
 	ctx.State.IsMulti = false
-	returnVals := make([]any, 0)
-	if len(ctx.State.MultiCmds) == 0 {
-		return ReturnValue{
-			RArray,
-			returnVals,
-		}
-	}
 	return ReturnValue{
-		RSimpleString,
-		"OK",
+		RArray,
+		returnVals,
 	}
 }
 
