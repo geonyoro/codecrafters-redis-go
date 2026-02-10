@@ -3,7 +3,7 @@ package main
 import "strings"
 
 func Discard(ctx *Context, cmd Command) ReturnValue {
-	if !ctx.State.IsMulti {
+	if !ctx.ConnState.IsMulti {
 		return ReturnValue{
 			RSimpleError,
 			ErrorDiscardNoMulti,
@@ -16,7 +16,7 @@ func Discard(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Exec(ctx *Context, cmd Command) ReturnValue {
-	if !ctx.State.IsMulti {
+	if !ctx.ConnState.IsMulti {
 		return ReturnValue{
 			RSimpleError,
 			ErrorMultiWithoutExec,
@@ -24,12 +24,12 @@ func Exec(ctx *Context, cmd Command) ReturnValue {
 	}
 	returnVals := make([]any, 0)
 	// execute each of the commands
-	for _, cmd := range ctx.State.MultiCmds {
+	for _, cmd := range ctx.ConnState.MultiCmds {
 		ret := cmd.Callable(ctx, Command{Args: cmd.Args})
 		returnVals = append(returnVals, ret)
 	}
 
-	ctx.State.IsMulti = false
+	ctx.ConnState.IsMulti = false
 	return ReturnValue{
 		RArray,
 		returnVals,
@@ -37,15 +37,15 @@ func Exec(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Multi(ctx *Context, cmd Command) ReturnValue {
-	if !ctx.State.IsMulti {
-		ctx.State.IsMulti = true
+	if !ctx.ConnState.IsMulti {
+		ctx.ConnState.IsMulti = true
 		return ReturnValue{
 			RSimpleString,
 			"OK",
 		}
 	}
 	cmdFunc, _ := CmdFuncMap[strings.ToUpper(cmd.Command)]
-	ctx.State.MultiCmds = append(ctx.State.MultiCmds, MultiCmd{
+	ctx.ConnState.MultiCmds = append(ctx.ConnState.MultiCmds, MultiCmd{
 		Callable: cmdFunc,
 		Args:     cmd.Args,
 	})

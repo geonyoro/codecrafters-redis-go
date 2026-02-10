@@ -9,24 +9,16 @@ import (
 
 func TestExec_EmptyTransaction(t *testing.T) {
 	// should return an array
-	ctx := &Context{
-		State: NewState(),
-	}
-	ctx.State.IsMulti = true
+	ctx := NewTestingContext()
+	ctx.ConnState.IsMulti = true
 	ret := Exec(ctx, Command{})
 	assert.Equal(t, []any{}, ret.EncoderArgs)
 }
 
 func TestExec_QueuedCommands(t *testing.T) {
-	dConn := DummyConn{
-		Data: []byte{},
-	}
-	ctx := &Context{
-		Conn:  &dConn,
-		State: NewState(),
-	}
-	ctx.State.IsMulti = true
-	ctx.State.MultiCmds = []MultiCmd{
+	ctx := NewTestingContext()
+	ctx.ConnState.IsMulti = true
+	ctx.ConnState.MultiCmds = []MultiCmd{
 		{Set, []string{"foo", "xyz"}},
 		{Incr, []string{"foo"}},
 		{Incr, []string{"bar"}},
@@ -52,38 +44,20 @@ func TestExec_QueuedCommands(t *testing.T) {
 }
 
 func TestExec_WithoutMulti(t *testing.T) {
-	dConn := DummyConn{
-		Data: []byte{},
-	}
-	ctx := &Context{
-		Conn:  &dConn,
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	ret := Exec(ctx, Command{})
 	assert.Equal(t, ErrorMultiWithoutExec, ret.EncoderArgs)
 }
 
 func TestMulti_ReturnsOK(t *testing.T) {
-	dConn := DummyConn{
-		Data: []byte{},
-	}
-	ctx := &Context{
-		Conn:  &dConn,
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	ret := Multi(ctx, Command{})
 	assert.Equal(t, "OK", ret.EncoderArgs)
 }
 
 func TestMulti_QueueCommands(t *testing.T) {
-	dConn := DummyConn{
-		Data: []byte{},
-	}
-	ctx := &Context{
-		Conn:  &dConn,
-		State: NewState(),
-	}
-	ctx.State.IsMulti = true
+	ctx := NewTestingContext()
+	ctx.ConnState.IsMulti = true
 	var ret ReturnValue
 	ret = Multi(ctx, Command{"SET", []string{"foo", "1"}})
 	assert.Equal(t, "QUEUED", ret.EncoderArgs)

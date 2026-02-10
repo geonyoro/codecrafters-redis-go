@@ -13,11 +13,7 @@ func TestXrangeInnerWithSequence(t *testing.T) {
 		To   string
 		Ret  []XRangeReturn
 	}
-	d := DummyConn{}
-	ctx := &Context{
-		Conn:  &d,
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	stream := NewStream()
 	streamId := "myStream"
 	ctx.State.StreamMap[streamId] = stream
@@ -117,11 +113,7 @@ func TestXreadInner(t *testing.T) {
 		StreamStart map[string]string
 		Ret         []XReadReturn
 	}
-	d := DummyConn{}
-	ctx := &Context{
-		Conn:  &d,
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	stream1 := NewStream()
 	streamId1 := "myStream1"
 	ctx.State.StreamMap[streamId1] = stream1

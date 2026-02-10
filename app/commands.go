@@ -16,8 +16,8 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 	cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
 
 	var returnVal ReturnValue
-	if ok || ctx.State.IsMulti {
-		if ctx.State.IsMulti {
+	if ok || ctx.ConnState.IsMulti {
+		if ctx.ConnState.IsMulti {
 			returnVal = Multi(ctx, cmd)
 		} else {
 			returnVal = cmdFunc(ctx, cmd)

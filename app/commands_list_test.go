@@ -7,13 +7,7 @@ import (
 )
 
 func TestLrange_NegativeNos(t *testing.T) {
-	dConn := DummyConn{
-		Data: []byte{},
-	}
-	ctx := &Context{
-		Conn:  &dConn,
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	lmap := ctx.State.ListMap
 	lvar := ListVariable{
 		Values: []string{"a", "b", "c", "d", "e"},
@@ -71,13 +65,7 @@ func TestLrange_NegativeNos(t *testing.T) {
 }
 
 func TestLrangeBasic(t *testing.T) {
-	dConn := DummyConn{
-		Data: []byte{},
-	}
-	ctx := &Context{
-		Conn:  &dConn,
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	lmap := ctx.State.ListMap
 	lvar := ListVariable{
 		Values: []string{"a", "b", "c", "d", "e"},
@@ -93,10 +81,7 @@ func TestLrangeBasic(t *testing.T) {
 }
 
 func TestLPush(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	lMap := ctx.State.ListMap
 	list := []string{"1", "2", "3"}
 	lMap["list"] = &ListVariable{
@@ -111,10 +96,7 @@ func TestLPush(t *testing.T) {
 }
 
 func TestLlen(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	lMap := ctx.State.ListMap
 	list := []string{"1", "2", "3"}
 	lMap["list"] = &ListVariable{

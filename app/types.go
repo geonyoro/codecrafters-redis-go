@@ -52,9 +52,21 @@ func NewStream() *Stream {
 	}
 }
 
+type ConnState struct {
+	IsMulti   bool
+	MultiCmds []MultiCmd
+}
+
+func NewConnState() *ConnState {
+	return &ConnState{
+		MultiCmds: make([]MultiCmd, 0),
+	}
+}
+
 type Context struct {
-	Conn  io.ReadWriteCloser
-	State *State
+	Conn      io.ReadWriteCloser
+	ConnState *ConnState
+	State     *State
 }
 
 type MultiCmd struct {
@@ -63,11 +75,9 @@ type MultiCmd struct {
 }
 
 type State struct {
-	IsMulti     bool
 	VariableMap map[string]Variable
 	ListMap     map[string]*ListVariable
 	StreamMap   map[string]*Stream
-	MultiCmds   []MultiCmd
 }
 
 func NewState() *State {
@@ -78,7 +88,6 @@ func NewState() *State {
 		VariableMap: vMap,
 		ListMap:     lMap,
 		StreamMap:   sMap,
-		MultiCmds:   make([]MultiCmd, 0),
 	}
 }
 

@@ -9,29 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type DummyConn struct {
-	Data []byte
-}
-
-func (d *DummyConn) Read(p []byte) (n int, err error) {
-	copySize := copy(d.Data, p)
-	return copySize, nil
-}
-
-func (d *DummyConn) Write(p []byte) (n int, err error) {
-	d.Data = append(d.Data, p...)
-	return len(d.Data), nil
-}
-
-func (d *DummyConn) Close() error {
-	return nil
-}
-
 func TestIncr_WithExistantValue(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	key := "x"
 	(ctx.State.VariableMap)[key] = Variable{
 		Value: "1",
@@ -52,10 +31,7 @@ func TestIncr_WithExistantValue(t *testing.T) {
 }
 
 func TestIncr_WithInexistantValue(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	key := "x"
 	// perform the increase
 	cmd := Command{
@@ -67,10 +43,7 @@ func TestIncr_WithInexistantValue(t *testing.T) {
 }
 
 func TestIncr_WithNonNumericValue(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	key := "x"
 	(ctx.State.VariableMap)[key] = Variable{
 		Value: "y",
@@ -87,10 +60,7 @@ func TestIncr_WithNonNumericValue(t *testing.T) {
 }
 
 func TestXadd(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	millis := "1526919030474"
 	sequence := "0"
 	streamId := fmt.Sprintf("%s-%s", millis, sequence)
@@ -110,10 +80,7 @@ func TestXadd(t *testing.T) {
 }
 
 func TestXaddWithPartial(t *testing.T) {
-	ctx := &Context{
-		Conn:  &DummyConn{},
-		State: NewState(),
-	}
+	ctx := NewTestingContext()
 	millis := "1526919030474"
 	sequence := "*"
 	streamId := fmt.Sprintf("%s-%s", millis, sequence)

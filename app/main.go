@@ -42,8 +42,9 @@ func handleConn(conn net.Conn, globalState *State) {
 			continue
 		}
 		ctx := Context{
-			Conn:  conn,
-			State: globalState,
+			Conn:      conn,
+			ConnState: NewConnState(),
+			State:     globalState,
 		}
 		ExecuteCommand(&ctx, command)
 	}
