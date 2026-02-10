@@ -40,3 +40,19 @@ func TestMulti_ReturnsOK(t *testing.T) {
 	assert.Equal(t, "OK", ret.EncoderArgs)
 }
 
+func TestMulti_QueuesCommands(t *testing.T) {
+	dConn := DummyConn{
+		Data: []byte{},
+	}
+	ctx := &Context{
+		Conn:  &dConn,
+		State: NewState(),
+	}
+	ctx.State.IsMulti = true
+	var ret ReturnValue
+	ret = Multi(ctx, Command{"SET", []string{"foo", "1"}})
+	assert.Equal(t, "QUEUED", ret.EncoderArgs)
+
+	ret = Multi(ctx, Command{"INCR", []string{"foo"}})
+	assert.Equal(t, "QUEUED", ret.EncoderArgs)
+}

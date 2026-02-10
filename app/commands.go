@@ -14,8 +14,14 @@ type ReturnValue struct {
 
 func ExecuteCommand(ctx *Context, cmd Command) bool {
 	cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
-	if ok {
-		returnVal := cmdFunc(ctx, cmd)
+
+	var returnVal ReturnValue
+	if ok || ctx.State.IsMulti {
+		if ctx.State.IsMulti {
+			returnVal = Multi(ctx, cmd)
+		} else {
+			returnVal = cmdFunc(ctx, cmd)
+		}
 		encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
 		ctx.Conn.Write(encodedVal)
 		return true
@@ -148,7 +154,6 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"LLEN":   Llen,
 	"LPOP":   Lpop,
 	"LPUSH":  Lpush,
-	"MULTI":  Multi,
 	"RPUSH":  Rpush,
 	"SET":    Set,
 	"TYPE":   Type,
