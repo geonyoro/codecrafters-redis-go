@@ -131,13 +131,16 @@ func Get(ctx *Context, cmd Command) ReturnValue {
 func Incr(ctx *Context, cmd Command) ReturnValue {
 	key := cmd.Args[0]
 	strVal, ok := (ctx.State.VariableMap)[key]
-	if !ok {
-		return ReturnValue{RNullBulkString, nil}
-	}
-	val, err := strconv.Atoi(strVal.Value)
-	if err != nil {
-		return ReturnValue{RNullBulkString, nil}
-	}
+	var (
+		val int
+		err error
+	)
+	if ok {
+		val, err = strconv.Atoi(strVal.Value)
+		if err != nil {
+			return ReturnValue{RNullBulkString, nil}
+		}
+	} // otherwise the value is starts at 0
 	val += 1
 	strVal.Value = strconv.Itoa(val)
 	ctx.State.VariableMap[key] = strVal
