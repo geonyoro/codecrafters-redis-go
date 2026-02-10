@@ -27,7 +27,7 @@ func TestExec_QueuedCommands(t *testing.T) {
 	}
 	ctx.State.IsMulti = true
 	ctx.State.MultiCmds = []MultiCmd{
-		{Set, []string{"foo", "1"}},
+		{Set, []string{"foo", "xyz"}},
 		{Incr, []string{"foo"}},
 		{Incr, []string{"bar"}},
 		{Get, []string{"bar"}},
@@ -45,7 +45,7 @@ func TestExec_QueuedCommands(t *testing.T) {
 	}
 	assert.Equal(t, []any{
 		"OK",
-		2,
+		"ERR value is not an integer or out of range",
 		1,
 		"1",
 	}, retEncoderArgs)
