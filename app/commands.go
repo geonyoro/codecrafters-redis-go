@@ -128,6 +128,22 @@ func Get(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RNullBulkString, nil}
 }
 
+func Incr(ctx *Context, cmd Command) ReturnValue {
+	key := cmd.Args[0]
+	strVal, ok := (ctx.State.VariableMap)[key]
+	if !ok {
+		return ReturnValue{RNullBulkString, nil}
+	}
+	val, err := strconv.Atoi(strVal.Value)
+	if err != nil {
+		return ReturnValue{RNullBulkString, nil}
+	}
+	val += 1
+	strVal.Value = strconv.Itoa(val)
+	ctx.State.VariableMap[key] = strVal
+	return ReturnValue{RInteger, val}
+}
+
 func Llen(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
@@ -280,6 +296,7 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"BLPOP":  Blpop,
 	"ECHO":   Echo,
 	"GET":    Get,
+	"INCR":   Incr,
 	"LRANGE": Lrange,
 	"PING":   Ping,
 	"LLEN":   Llen,
