@@ -13,9 +13,17 @@ type ReturnValue struct {
 }
 
 func ExecuteCommand(ctx *Context, cmd Command) bool {
-	cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
+	var (
+		returnVal ReturnValue
+		ok        bool
+		cmdFunc   func(ctx *Context, cmd Command) ReturnValue
+	)
+	if strings.ToUpper(cmd.Command) == "MULTI" {
+		returnVal = Multi(ctx, cmd)
+	} else {
+		cmdFunc, ok = CmdFuncMap[strings.ToUpper(cmd.Command)]
+	}
 
-	var returnVal ReturnValue
 	if ok || ctx.ConnState.IsMulti {
 		if ctx.ConnState.IsMulti {
 			returnVal = Multi(ctx, cmd)
