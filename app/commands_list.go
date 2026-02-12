@@ -6,6 +6,9 @@ import (
 )
 
 func Blpop(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.Lock()
+	defer ctx.State.Mu.Unlock()
+
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
@@ -51,6 +54,9 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Llen(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.RLock()
+	defer ctx.State.Mu.RUnlock()
+
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
@@ -61,6 +67,9 @@ func Llen(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Lpop(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.Lock()
+	defer ctx.State.Mu.Unlock()
+
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
@@ -83,6 +92,9 @@ func Lpop(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Lpush(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.Lock()
+	defer ctx.State.Mu.Unlock()
+
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
@@ -105,6 +117,9 @@ func Lpush(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Rpush(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.Lock()
+	defer ctx.State.Mu.Unlock()
+
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
 	list, ok := listMap[listName]
@@ -121,6 +136,9 @@ func Rpush(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Lrange(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.RLock()
+	defer ctx.State.Mu.RUnlock()
+
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
 	listVar, ok := listMap[listName]

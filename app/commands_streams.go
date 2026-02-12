@@ -8,6 +8,9 @@ import (
 )
 
 func Xadd(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.Lock()
+	defer ctx.State.Mu.Unlock()
+
 	streamKey := cmd.Args[0]
 	stream := ctx.State.GetOrCreateStreamForKey(streamKey)
 
@@ -70,6 +73,9 @@ func Xadd(ctx *Context, cmd Command) ReturnValue {
 }
 
 func XRange(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.RLock()
+	defer ctx.State.Mu.RUnlock()
+
 	streamKey := cmd.Args[0]
 	fromId := cmd.Args[1]
 	toId := cmd.Args[2]
@@ -87,6 +93,9 @@ func XRange(ctx *Context, cmd Command) ReturnValue {
 }
 
 func XRead(ctx *Context, cmd Command) ReturnValue {
+	ctx.State.Mu.RLock()
+	defer ctx.State.Mu.RUnlock()
+
 	args, err := ParseXReadArgs(cmd.Args)
 	if err != nil {
 		return ReturnValue{
