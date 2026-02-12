@@ -13,26 +13,22 @@ type ReturnValue struct {
 }
 
 func ExecuteCommand(ctx *Context, cmd Command) bool {
-	var (
-		returnVal ReturnValue
-		ok        bool
-		cmdFunc   func(ctx *Context, cmd Command) ReturnValue
-	)
+	var returnVal ReturnValue
 	isMultiCmd := strings.ToUpper(cmd.Command) == "MULTI"
 
-	if ok || ctx.ConnState.IsMulti || isMultiCmd {
-		if ctx.ConnState.IsMulti || isMultiCmd {
-			returnVal = Multi(ctx, cmd)
-		} else {
-			cmdFunc, ok = CmdFuncMap[strings.ToUpper(cmd.Command)]
-			returnVal = cmdFunc(ctx, cmd)
+	if ctx.ConnState.IsMulti || isMultiCmd {
+		returnVal = Multi(ctx, cmd)
+	} else {
+		cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
+		if !ok {
+			fmt.Println("Failed to find cmd for", cmd.Command)
+			return false
 		}
-		encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
-		ctx.Conn.Write(encodedVal)
-		return true
+		returnVal = cmdFunc(ctx, cmd)
 	}
-	fmt.Println("Failed to find cmd for", cmd.Command)
-	return false
+	encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
+	ctx.Conn.Write(encodedVal)
+	return true
 }
 
 func Echo(ctx *Context, cmd Command) ReturnValue {
