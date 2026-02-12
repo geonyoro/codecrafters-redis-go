@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 func Discard(ctx *Context, cmd Command) ReturnValue {
 	if !ctx.ConnState.IsMulti {
@@ -26,6 +29,7 @@ func Exec(ctx *Context, cmd Command) ReturnValue {
 	// execute each of the commands
 	for _, cmd := range ctx.ConnState.MultiCmds {
 		ret := cmd.Callable(ctx, Command{Args: cmd.Args})
+		fmt.Printf("Exec: %#v", ret)
 		returnVals = append(returnVals, ret)
 	}
 

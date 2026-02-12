@@ -1,0 +1,3 @@
+Fixes
+XREAD needs to be ordered, currently isn't
+Introduce concurrent lock
