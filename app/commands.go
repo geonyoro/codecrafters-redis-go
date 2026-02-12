@@ -16,9 +16,12 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 	var returnVal ReturnValue
 	isCmdMulti := strings.ToUpper(cmd.Command) == "MULTI"
 	isCmdExec := strings.ToUpper(cmd.Command) == "EXEC"
+	isCmdDiscard := strings.ToUpper(cmd.Command) == "DISCARD"
 
 	if ctx.ConnState.IsMulti || isCmdMulti {
-		if isCmdExec {
+		if isCmdDiscard {
+			returnVal = Discard(ctx, cmd)
+		} else if isCmdExec {
 			returnVal = Exec(ctx, cmd)
 		} else {
 			returnVal = Multi(ctx, cmd)

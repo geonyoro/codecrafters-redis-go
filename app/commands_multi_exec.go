@@ -11,6 +11,7 @@ func Discard(ctx *Context, cmd Command) ReturnValue {
 			ErrorDiscardNoMulti,
 		}
 	}
+	ctx.ConnState.IsMulti = false
 	return ReturnValue{
 		RSimpleString,
 		"OK",
