@@ -111,9 +111,8 @@ func Set(ctx *Context, cmd Command) ReturnValue {
 func Type(ctx *Context, cmd Command) ReturnValue {
 	key := cmd.Args[0]
 	// string, list, set, zset, hash, stream, vectorset
-	state := *ctx.State
 
-	varMap := state.VariableMap
+	varMap := ctx.State.VariableMap
 	if _, ok := varMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -121,7 +120,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	lMap := state.ListMap
+	lMap := ctx.State.ListMap
 	if _, ok := lMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -129,7 +128,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	streamMap := state.StreamMap
+	streamMap := ctx.State.StreamMap
 	if _, ok := streamMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
