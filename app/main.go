@@ -29,6 +29,7 @@ func main() {
 
 func handleConn(conn net.Conn, globalState *State) {
 	defer conn.Close()
+	connState := NewConnState()
 
 	for {
 		buffer := make([]byte, 1024)
@@ -43,7 +44,7 @@ func handleConn(conn net.Conn, globalState *State) {
 		}
 		ctx := Context{
 			Conn:      conn,
-			ConnState: NewConnState(),
+			ConnState: connState,
 			State:     globalState,
 		}
 		ExecuteCommand(&ctx, command)
