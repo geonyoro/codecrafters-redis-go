@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -29,8 +28,8 @@ func Exec(ctx *Context, cmd Command) ReturnValue {
 	// execute each of the commands
 	for _, cmd := range ctx.ConnState.MultiCmds {
 		ret := cmd.Callable(ctx, Command{Args: cmd.Args})
-		fmt.Printf("Exec: %#v", ret)
-		returnVals = append(returnVals, ret)
+		v := ret.Encoder(ret.EncoderArgs)
+		returnVals = append(returnVals, v)
 	}
 
 	ctx.ConnState.IsMulti = false

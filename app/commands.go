@@ -20,7 +20,6 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 	if ctx.ConnState.IsMulti || isCmdMulti {
 		if isCmdExec {
 			returnVal = Exec(ctx, cmd)
-			fmt.Printf("ExecuteCommand: %#v\n", returnVal)
 		} else {
 			returnVal = Multi(ctx, cmd)
 		}

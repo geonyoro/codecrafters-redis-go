@@ -54,6 +54,9 @@ func RArray(arg any) []byte {
 			output = append(output, RBulkString(e)...)
 		case int:
 			output = append(output, RInteger(e)...)
+		case []byte:
+			// just merge the 2 arrays
+			output = append(output, e...)
 		case []any:
 			ret := RArray(e)
 			output = append(output, ret...)
