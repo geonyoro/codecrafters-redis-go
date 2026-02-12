@@ -18,16 +18,13 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 		ok        bool
 		cmdFunc   func(ctx *Context, cmd Command) ReturnValue
 	)
-	if strings.ToUpper(cmd.Command) == "MULTI" {
-		returnVal = Multi(ctx, cmd)
-	} else {
-		cmdFunc, ok = CmdFuncMap[strings.ToUpper(cmd.Command)]
-	}
+	isMultiCmd := strings.ToUpper(cmd.Command) == "MULTI"
 
-	if ok || ctx.ConnState.IsMulti {
-		if ctx.ConnState.IsMulti {
+	if ok || ctx.ConnState.IsMulti || isMultiCmd {
+		if ctx.ConnState.IsMulti || isMultiCmd {
 			returnVal = Multi(ctx, cmd)
 		} else {
+			cmdFunc, ok = CmdFuncMap[strings.ToUpper(cmd.Command)]
 			returnVal = cmdFunc(ctx, cmd)
 		}
 		encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
