@@ -75,7 +75,6 @@ type MultiCmd struct {
 }
 
 type State struct {
-	Mu          sync.RWMutex
 	VariableMap map[string]Variable
 	ListMap     map[string]*ListVariable
 	StreamMap   map[string]*Stream

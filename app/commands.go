@@ -36,9 +36,6 @@ func Echo(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Get(ctx *Context, cmd Command) ReturnValue {
-	ctx.State.Mu.RLock()
-	defer ctx.State.Mu.RUnlock()
-
 	key := cmd.Args[0]
 	value, ok := (ctx.State.VariableMap)[key]
 	if ok {
@@ -58,9 +55,6 @@ func Get(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Incr(ctx *Context, cmd Command) ReturnValue {
-	ctx.State.Mu.Lock()
-	defer ctx.State.Mu.Unlock()
-
 	key := cmd.Args[0]
 	strVal, ok := (ctx.State.VariableMap)[key]
 	var (
@@ -84,9 +78,6 @@ func Ping(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Set(ctx *Context, cmd Command) ReturnValue {
-	ctx.State.Mu.Lock()
-	defer ctx.State.Mu.Unlock()
-
 	key := cmd.Args[0]
 	value := cmd.Args[1]
 
@@ -118,13 +109,11 @@ func Set(ctx *Context, cmd Command) ReturnValue {
 }
 
 func Type(ctx *Context, cmd Command) ReturnValue {
-	ctx.State.Mu.RLock()
-	defer ctx.State.Mu.RUnlock()
-
 	key := cmd.Args[0]
 	// string, list, set, zset, hash, stream, vectorset
+	state := *ctx.State
 
-	varMap := ctx.State.VariableMap
+	varMap := state.VariableMap
 	if _, ok := varMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -132,7 +121,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	lMap := ctx.State.ListMap
+	lMap := state.ListMap
 	if _, ok := lMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
@@ -140,7 +129,7 @@ func Type(ctx *Context, cmd Command) ReturnValue {
 		}
 	}
 
-	streamMap := ctx.State.StreamMap
+	streamMap := state.StreamMap
 	if _, ok := streamMap[key]; ok {
 		return ReturnValue{
 			RSimpleString,
