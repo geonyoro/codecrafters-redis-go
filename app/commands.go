@@ -14,10 +14,15 @@ type ReturnValue struct {
 
 func ExecuteCommand(ctx *Context, cmd Command) bool {
 	var returnVal ReturnValue
-	isMultiCmd := strings.ToUpper(cmd.Command) == "MULTI"
+	isCmdMulti := strings.ToUpper(cmd.Command) == "MULTI"
+	isCmdExec := strings.ToUpper(cmd.Command) == "EXEC"
 
-	if ctx.ConnState.IsMulti || isMultiCmd {
-		returnVal = Multi(ctx, cmd)
+	if ctx.ConnState.IsMulti || isCmdMulti {
+		if isCmdExec {
+			returnVal = Exec(ctx, cmd)
+		} else {
+			returnVal = Multi(ctx, cmd)
+		}
 	} else {
 		cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
 		if !ok {
