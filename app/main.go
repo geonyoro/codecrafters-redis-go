@@ -9,14 +9,15 @@ import (
 
 func main() {
 	globalState := NewState()
+	args := parseCliArgs()
 
-	l, err := net.Listen("tcp4", "0.0.0.0:6379")
+	l, err := net.Listen("tcp4", fmt.Sprintf("%s:%d", args.Host, args.Port))
 	if err != nil {
-		fmt.Println("Failed to bind to port 6379")
+		fmt.Printf("Failed to bind to host:port %s:%d\n", args.Host, args.Port)
 		os.Exit(1)
 	}
 
-	slog.Debug("Bound: Accepting connections.")
+	slog.Debug(fmt.Sprintf("Bound: Accepting connections on %s:%d.", args.Host, args.Port))
 	for {
 		conn, err := l.Accept()
 		if err != nil {
