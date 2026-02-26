@@ -45,7 +45,7 @@ func generateMasterReplId() string {
 			val -= 10
 			c = 'a' + val
 		}
-		id += string(c)
+		id += string(rune(c))
 	}
 	return id
 }
