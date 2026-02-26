@@ -29,17 +29,17 @@ func TestExec_QueuedCommands(t *testing.T) {
 
 	retEncoderArgs := make([]any, 4)
 	for idx, retAnyArg := range ret.EncoderArgs.([]any) {
-		retArg, ok := retAnyArg.(ReturnValue)
+		ret2Args, ok := retAnyArg.([]byte)
 		if !ok {
-			panic(fmt.Sprintf("value at idx %d is not a ReturnValue", idx))
+			panic(fmt.Sprintf("value at outer idx %d is not a ReturnValue", idx))
 		}
-		retEncoderArgs[idx] = retArg.EncoderArgs
+		retEncoderArgs[idx] = string(ret2Args)
 	}
 	assert.Equal(t, []any{
-		"OK",
-		"ERR value is not an integer or out of range",
-		1,
-		"1",
+		"+OK\r\n",
+		"-ERR value is not an integer or out of range\r\n",
+		":1\r\n",
+		"$1\r\n1\r\n",
 	}, retEncoderArgs)
 }
 
