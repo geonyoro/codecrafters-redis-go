@@ -1,3 +1,2 @@
-Fixes
-XREAD needs to be ordered, currently isn't
+XREAD sometimes returns a single entry from array, instead of array
 Introduce concurrent lock

@@ -51,3 +51,7 @@ func TestXrangeReturn_RArray(t *testing.T) {
 	assert.Equal(t, v1, valMap[k1])
 	assert.Equal(t, v2, valMap[k2])
 }
+
+func TestGenerateMasterReplId(t *testing.T) {
+	assert.Equal(t, 40, len(generateMasterReplId()))
+}

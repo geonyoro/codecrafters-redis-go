@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 type State struct {
 	Settings    *Settings
 	VariableMap map[string]Variable
@@ -12,7 +14,9 @@ func NewState() *State {
 	lMap := make(map[string]*ListVariable)
 	sMap := make(map[string]*Stream)
 	return &State{
-		Settings:    &Settings{},
+		Settings: &Settings{
+			MasterReplId: generateMasterReplId(),
+		},
 		VariableMap: vMap,
 		ListMap:     lMap,
 		StreamMap:   sMap,
@@ -27,4 +31,21 @@ func (s *State) updateWithCliArgs(args *CliArgs) {
 	if len(args.ReplicaOf) > 0 {
 		s.WithReplicaOf(args.ReplicaOf)
 	}
+}
+
+func generateMasterReplId() string {
+	id := ""
+	var val int
+	for range 40 {
+		val = rand.Intn(35)
+		var c int
+		if val < 10 {
+			c = '0' + val
+		} else {
+			val -= 10
+			c = 'a' + val
+		}
+		id += string(c)
+	}
+	return id
 }

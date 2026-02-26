@@ -75,7 +75,9 @@ type MultiCmd struct {
 }
 
 type Settings struct {
-	ReplicaOf string
+	ReplicaOf        string
+	MasterReplId     string
+	MasterReplOffset int64
 }
 
 type XRangeReturn struct {
