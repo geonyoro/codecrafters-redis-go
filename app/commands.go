@@ -158,6 +158,7 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"EXEC":    Exec,
 	"GET":     Get,
 	"INCR":    Incr,
+	"INFO":    Info,
 	"LRANGE":  Lrange,
 	"PING":    Ping,
 	"LLEN":    Llen,
