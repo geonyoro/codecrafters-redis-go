@@ -9,7 +9,8 @@ import (
 
 func main() {
 	globalState := NewState()
-	args := parseCliArgs()
+	args := ParseCliArgs(os.Args[1:])
+	globalState.updateWithCliArgs(args)
 
 	l, err := net.Listen("tcp4", fmt.Sprintf("%s:%d", args.Host, args.Port))
 	if err != nil {

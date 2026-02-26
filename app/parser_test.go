@@ -16,3 +16,14 @@ func TestParseInput(t *testing.T) {
 		},
 	})
 }
+
+func TestParseCliArgs_Listener(t *testing.T) {
+	args := ParseCliArgs([]string{})
+	assert.Equal(t, "127.0.0.1", args.Host)
+	assert.Equal(t, 6379, args.Port)
+}
+
+func TestParseCliArgs_ReplicaOf(t *testing.T) {
+	args := ParseCliArgs([]string{"--replicaof", "localhost 6379"})
+	assert.Equal(t, "localhost 6379", args.ReplicaOf)
+}
