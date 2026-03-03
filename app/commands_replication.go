@@ -23,9 +23,19 @@ func SetupReplication(globalState *State) error {
 
 	conn, err := Connect(host, port)
 	if err != nil {
-		return nil
+		return err
 	}
-	ReplPing(conn)
+
+	err = ReplPing(conn)
+	if err != nil {
+		return err
+	}
+
+	err = ReplConf(conn, globalState)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -40,5 +50,60 @@ func ReplPing(conn net.Conn) error {
 	if err != nil {
 		return err
 	}
+
+	// await response
+	buffer := make([]byte, 1024)
+	n, err := conn.Read(buffer)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("ReplPing: %s\n", buffer[:n])
+	return nil
+}
+
+func ReplConf(conn net.Conn, globalState *State) error {
+	var err error
+	err = ReplConfPort(conn, globalState)
+	if err != nil {
+		return err
+	}
+
+	err = ReplConfCapa(conn, globalState)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ReplConfPort(conn net.Conn, globalState *State) error {
+	val := RArray([]any{"REPLCONF", "listening-port", fmt.Sprintf("%d", globalState.Settings.Port)})
+	_, err := conn.Write(val)
+	if err != nil {
+		return err
+	}
+
+	buffer := make([]byte, 1024)
+	n, err := conn.Read(buffer)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("ReplConf port: %s\n", buffer[:n])
+	return nil
+}
+
+func ReplConfCapa(conn net.Conn, globalState *State) error {
+	val := RArray([]any{"REPLCONF", "capa", "psync2"})
+	_, err := conn.Write(val)
+	if err != nil {
+		return err
+	}
+
+	buffer := make([]byte, 1024)
+	n, err := conn.Read(buffer)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("ReplConf port: %s\n", buffer[:n])
 	return nil
 }

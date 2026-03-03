@@ -78,6 +78,8 @@ type Settings struct {
 	ReplicaOf        string
 	MasterReplId     string
 	MasterReplOffset int64
+	Port             int
+	Host             string
 }
 
 type XRangeReturn struct {

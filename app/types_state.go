@@ -31,6 +31,8 @@ func (s *State) updateWithCliArgs(args *CliArgs) {
 	if len(args.ReplicaOf) > 0 {
 		s.WithReplicaOf(args.ReplicaOf)
 	}
+	s.Settings.Port = args.Port
+	s.Settings.Host = args.Host
 }
 
 func generateMasterReplId() string {
