@@ -23,7 +23,11 @@ func RSimpleError(arg any) []byte {
 
 func RRawBytes(arg any) []byte {
 	val := arg.([]byte)
-	return val
+	valSize := len(val)
+	var output []byte
+	output = []byte(fmt.Sprintf("$%d\r\n", valSize))
+	output = append(output, val...)
+	return output
 }
 
 func RBulkString(arg any) []byte {
