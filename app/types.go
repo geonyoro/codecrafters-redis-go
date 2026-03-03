@@ -75,6 +75,7 @@ type MultiCmd struct {
 }
 
 type Settings struct {
+	Replicas         []*io.ReadWriteCloser
 	ReplicaOf        string
 	MasterReplId     string
 	MasterReplOffset int64

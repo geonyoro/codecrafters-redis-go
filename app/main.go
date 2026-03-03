@@ -48,6 +48,14 @@ func handleConn(conn net.Conn, globalState *State) {
 			fmt.Println(err)
 			continue
 		}
+
+		fmt.Println(command.Command, len(globalState.Settings.Replicas))
+		if IsWriteCommand(command.Command) && len(globalState.Settings.Replicas) > 0 {
+			for _, replica := range globalState.Settings.Replicas {
+				(*replica).Write(buffer[:readSize])
+			}
+		}
+
 		ctx := Context{
 			Conn:      conn,
 			ConnState: connState,

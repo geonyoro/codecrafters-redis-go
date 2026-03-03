@@ -139,5 +139,7 @@ func PsyncAsMaster(ctx *Context, cmd Command) ReturnValue {
 		panic(err)
 	}
 	ctx.Conn.Write(RRawBytes(rdb))
+
+	ctx.State.Settings.Replicas = append(ctx.State.Settings.Replicas, &ctx.Conn)
 	return ReturnValue{REmpty, ""}
 }

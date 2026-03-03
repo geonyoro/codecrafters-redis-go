@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -174,4 +175,10 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"XADD":     Xadd,
 	"XRANGE":   XRange,
 	"XREAD":    XRead,
+}
+
+var WriteCommands = []string{"SET", "DEL"}
+
+func IsWriteCommand(cmd string) bool {
+	return slices.Contains(WriteCommands, strings.ToUpper(cmd))
 }
