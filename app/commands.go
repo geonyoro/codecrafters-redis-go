@@ -164,6 +164,7 @@ var CmdFuncMap = map[string]func(ctx *Context, cmd Command) ReturnValue{
 	"LLEN":     Llen,
 	"LPOP":     Lpop,
 	"LPUSH":    Lpush,
+	"PSYNC":    PsyncAsMaster,
 	"REPLCONF": ReplConfAsMaster,
 	"RPUSH":    Rpush,
 	"SET":      Set,

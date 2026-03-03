@@ -127,3 +127,8 @@ func ReplPsync(conn net.Conn, globalState *State) error {
 func ReplConfAsMaster(ctx *Context, cmd Command) ReturnValue {
 	return ReturnValue{RSimpleString, "OK"}
 }
+
+func PsyncAsMaster(ctx *Context, cmd Command) ReturnValue {
+	// the master cannot perform an incremental update to the replica, and will start a full resynchronization
+	return ReturnValue{RSimpleString, fmt.Sprintf("FULLRESYNC %s 0", ctx.State.Settings.MasterReplId)}
+}
