@@ -36,6 +36,7 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 		returnVal = cmdFunc(ctx, cmd)
 	}
 	encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
+	fmt.Printf("%s %s %b", encodedVal, cmd.Command, ctx.State.IsReplica())
 	if len(encodedVal) > 0 {
 		if IsWriteCommand(cmd.Command) && ctx.State.IsReplica() {
 			// do nothing
