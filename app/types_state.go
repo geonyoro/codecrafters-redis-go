@@ -9,7 +9,7 @@ type State struct {
 	Settings    *Settings
 	VariableMap map[string]Variable
 	ListMap     map[string]*ListVariable
-	muListMap   sync.RWMutex
+	muListMap   sync.Mutex
 	StreamMap   map[string]*Stream
 }
 
