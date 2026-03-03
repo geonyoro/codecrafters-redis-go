@@ -11,6 +11,10 @@ func main() {
 	globalState := NewState()
 	args := ParseCliArgs(os.Args[1:])
 	globalState.updateWithCliArgs(args)
+	err := SetupReplication(globalState)
+	if err != nil {
+		panic(err)
+	}
 
 	l, err := net.Listen("tcp4", fmt.Sprintf("%s:%d", args.Host, args.Port))
 	if err != nil {
