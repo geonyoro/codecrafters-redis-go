@@ -134,7 +134,7 @@ func PsyncAsMaster(ctx *Context, cmd Command) ReturnValue {
 	ctx.Conn.Write(RSimpleString(fmt.Sprintf("FULLRESYNC %s 0", ctx.State.Settings.MasterReplId)))
 
 	rdb64 := "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog=="
-	rdb, err := base64.RawStdEncoding.DecodeString(rdb64)
+	rdb, err := base64.StdEncoding.DecodeString(rdb64)
 	if err != nil {
 		panic(err)
 	}
