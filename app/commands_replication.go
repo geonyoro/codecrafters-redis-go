@@ -45,7 +45,6 @@ func Connect(host, port string) (net.Conn, error) {
 
 func ReplPing(conn net.Conn) error {
 	val := RArray([]any{"Ping"})
-	fmt.Printf("%s", val)
 	_, err := conn.Write(val)
 	if err != nil {
 		return err
@@ -53,11 +52,10 @@ func ReplPing(conn net.Conn) error {
 
 	// await response
 	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
+	_, err = conn.Read(buffer)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("ReplPing: %s\n", buffer[:n])
 	return nil
 }
 
@@ -84,11 +82,10 @@ func ReplConfPort(conn net.Conn, globalState *State) error {
 	}
 
 	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
+	_, err = conn.Read(buffer)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("ReplConf port: %s\n", buffer[:n])
 	return nil
 }
 
@@ -100,10 +97,9 @@ func ReplConfCapa(conn net.Conn, globalState *State) error {
 	}
 
 	buffer := make([]byte, 1024)
-	n, err := conn.Read(buffer)
+	_, err = conn.Read(buffer)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("ReplConf port: %s\n", buffer[:n])
 	return nil
 }
