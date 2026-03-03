@@ -123,3 +123,7 @@ func ReplPsync(conn net.Conn, globalState *State) error {
 	}
 	return nil
 }
+
+func ReplConfAsMaster(ctx *Context, cmd Command) ReturnValue {
+	return ReturnValue{RSimpleString, "OK"}
+}
