@@ -12,7 +12,9 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 	if !ok {
 		// create the list
 		list = &ListVariable{}
+		ctx.State.muListMap.Lock()
 		listMap[listName] = list
+		ctx.State.muListMap.Unlock()
 		ctx.State.ListMap = listMap
 	}
 

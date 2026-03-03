@@ -1,11 +1,15 @@
 package main
 
-import "math/rand"
+import (
+	"math/rand"
+	"sync"
+)
 
 type State struct {
 	Settings    *Settings
 	VariableMap map[string]Variable
 	ListMap     map[string]*ListVariable
+	muListMap   sync.RWMutex
 	StreamMap   map[string]*Stream
 }
 
