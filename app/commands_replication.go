@@ -34,7 +34,8 @@ func Connect(host, port string) (net.Conn, error) {
 }
 
 func ReplPing(conn net.Conn) error {
-	val := RArray([]string{"Ping"})
+	val := RArray([]any{"Ping"})
+	fmt.Printf("%s", val)
 	_, err := conn.Write(val)
 	if err != nil {
 		return err
