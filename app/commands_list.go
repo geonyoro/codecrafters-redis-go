@@ -127,7 +127,9 @@ func Rpush(ctx *Context, cmd Command) ReturnValue {
 func Lrange(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
+	ctx.State.muListMap.Lock()
 	listVar, ok := listMap[listName]
+	ctx.State.muListMap.Unlock()
 	if !ok {
 		return ReturnValue{RArray, []any{}}
 	}
