@@ -16,8 +16,8 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 		list = &ListVariable{}
 		ctx.State.muListMap.Lock()
 		listMap[listName] = list
-		ctx.State.muListMap.Unlock()
 		ctx.State.ListMap = listMap
+		ctx.State.muListMap.Unlock()
 	}
 
 	// access timeout
@@ -57,7 +57,9 @@ func Blpop(ctx *Context, cmd Command) ReturnValue {
 func Llen(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
+	ctx.State.muListMap.Lock()
 	list, ok := listMap[listName]
+	ctx.State.muListMap.Unlock()
 	if !ok {
 		return ReturnValue{RInteger, 0}
 	}
@@ -67,7 +69,9 @@ func Llen(ctx *Context, cmd Command) ReturnValue {
 func Lpop(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
+	ctx.State.muListMap.Lock()
 	list, ok := listMap[listName]
+	ctx.State.muListMap.Unlock()
 	if !ok || len(list.Values) == 0 {
 		return ReturnValue{
 			Encoder:     RNullBulkString,
@@ -89,11 +93,15 @@ func Lpop(ctx *Context, cmd Command) ReturnValue {
 func Lpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
+	ctx.State.muListMap.Lock()
 	list, ok := listMap[listName]
+	ctx.State.muListMap.Unlock()
 	if !ok {
 		list = &ListVariable{}
+		ctx.State.muListMap.Lock()
 		listMap[listName] = list
 		ctx.State.ListMap = listMap
+		ctx.State.muListMap.Unlock()
 	}
 	argSize := len(cmd.Args) - 1
 	newList := make([]string, argSize)
@@ -111,11 +119,15 @@ func Lpush(ctx *Context, cmd Command) ReturnValue {
 func Rpush(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
+	ctx.State.muListMap.Lock()
 	list, ok := listMap[listName]
+	ctx.State.muListMap.Unlock()
 	if !ok {
 		list = &ListVariable{}
+		ctx.State.muListMap.Lock()
 		listMap[listName] = list
 		ctx.State.ListMap = listMap
+		ctx.State.muListMap.Unlock()
 	}
 	for i := 1; i < len(cmd.Args); i++ {
 		newValue := cmd.Args[i]
