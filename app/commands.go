@@ -35,7 +35,9 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 		returnVal = cmdFunc(ctx, cmd)
 	}
 	encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
-	ctx.Conn.Write(encodedVal)
+	if len(encodedVal) > 0 {
+		ctx.Conn.Write(encodedVal)
+	}
 	return true
 }
 

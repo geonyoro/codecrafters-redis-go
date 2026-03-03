@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net"
@@ -130,5 +131,13 @@ func ReplConfAsMaster(ctx *Context, cmd Command) ReturnValue {
 
 func PsyncAsMaster(ctx *Context, cmd Command) ReturnValue {
 	// the master cannot perform an incremental update to the replica, and will start a full resynchronization
-	return ReturnValue{RSimpleString, fmt.Sprintf("FULLRESYNC %s 0", ctx.State.Settings.MasterReplId)}
+	ctx.Conn.Write(RSimpleString(fmt.Sprintf("FULLRESYNC %s 0", ctx.State.Settings.MasterReplId)))
+
+	rdb64 := "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog=="
+	rdb, err := base64.RawStdEncoding.DecodeString(rdb64)
+	if err != nil {
+		panic(err)
+	}
+	ctx.Conn.Write(RRawBytes(rdb))
+	return ReturnValue{REmpty, ""}
 }

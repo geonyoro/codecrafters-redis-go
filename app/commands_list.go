@@ -8,7 +8,9 @@ import (
 func Blpop(ctx *Context, cmd Command) ReturnValue {
 	listName := cmd.Args[0]
 	listMap := ctx.State.ListMap
+	ctx.State.muListMap.RLock()
 	list, ok := listMap[listName]
+	ctx.State.muListMap.RUnlock()
 	if !ok {
 		// create the list
 		list = &ListVariable{}

@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func REmpty(arg any) []byte {
+	return []byte{}
+}
+
 func RSimpleString(arg any) []byte {
 	// The string mustn't contain a CR (\r) or LF (\n) character and is terminated by CRLF (i.e., \r\n).
 	val := arg.(string)
@@ -15,6 +19,13 @@ func RSimpleError(arg any) []byte {
 	val := arg.(string)
 	retString := fmt.Sprintf("-%s\r\n", val)
 	return []byte(retString)
+}
+
+func RRawBytes(arg any) []byte {
+	val := arg.([]byte)
+	valSize := len(val)
+	output := fmt.Sprintf("$%d\r\n%b", valSize, val)
+	return []byte(output)
 }
 
 func RBulkString(arg any) []byte {
