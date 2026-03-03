@@ -36,6 +36,11 @@ func SetupReplication(globalState *State) error {
 		return err
 	}
 
+	err = ReplPsync(conn, globalState)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -91,6 +96,21 @@ func ReplConfPort(conn net.Conn, globalState *State) error {
 
 func ReplConfCapa(conn net.Conn, globalState *State) error {
 	val := RArray([]any{"REPLCONF", "capa", "psync2"})
+	_, err := conn.Write(val)
+	if err != nil {
+		return err
+	}
+
+	buffer := make([]byte, 1024)
+	_, err = conn.Read(buffer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ReplPsync(conn net.Conn, globalState *State) error {
+	val := RArray([]any{"PSYNC", "?", "-1"})
 	_, err := conn.Write(val)
 	if err != nil {
 		return err
