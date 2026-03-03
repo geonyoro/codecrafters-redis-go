@@ -27,6 +27,10 @@ func NewState() *State {
 	}
 }
 
+func (s *State) IsReplica() bool {
+	return s.Settings.ReplicaOf != ""
+}
+
 func (s *State) WithReplicaOf(replicaOf string) {
 	s.Settings.ReplicaOf = replicaOf
 }
