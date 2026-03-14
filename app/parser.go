@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -11,29 +12,46 @@ type Command struct {
 	Args    []string
 }
 
-func ParseInput(input string) (Command, error) {
-	parts := strings.Split(input, "\r\n")
-	argCountString := parts[0]
-	argCountString = strings.TrimLeft(argCountString, "*")
-	argCount, _ := strconv.Atoi(argCountString)
-	var command string
-
-	var args []string
-	for i := range argCount {
-		index := (i * 2) + 1
-		_ = parts[index] // verificationSym
-		arg := parts[index+1]
-		if i == 0 {
-			command = arg
-			continue
+func ParseInput(inputb []byte) ([]Command, error) {
+	parts := strings.Split(string(inputb), "\r\n")
+	idx := 0
+	partCount := len(parts)
+	commands := make([]Command, 0)
+	for {
+		if idx >= partCount-1 {
+			break
 		}
-		args = append(args, arg)
-	}
+		// we expect many arrays
+		fmt.Printf("IDX:%d PC:%d\n", idx, partCount-1)
+		argCountString := parts[idx]
+		fmt.Printf("Part: %s,", parts[idx])
+		argCountString = strings.TrimLeft(argCountString, "*")
+		argCount, err := strconv.Atoi(argCountString)
+		if err != nil {
+			return commands, err
+		}
 
-	return Command{
-		Command: command,
-		Args:    args,
-	}, nil
+		var command string
+
+		var args []string
+		for argIdx := range argCount {
+			index := (argIdx * 2) + 1 + idx
+			_ = parts[index] // verificationSym
+			arg := parts[index+1]
+			if argIdx == 0 {
+				command = arg
+				continue
+			}
+			args = append(args, arg)
+		}
+		idx = idx + argCount*2 + 1
+		fmt.Printf("cmd: %s args: %+v\n", command, args)
+		commands = append(commands, Command{
+			Command: command,
+			Args:    args,
+		})
+	}
+	return commands, nil
 }
 
 func ParseCliArgs(args []string) *CliArgs {

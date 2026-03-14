@@ -30,13 +30,12 @@ func ExecuteCommand(ctx *Context, cmd Command) bool {
 	} else {
 		cmdFunc, ok := CmdFuncMap[strings.ToUpper(cmd.Command)]
 		if !ok {
-			fmt.Println("Failed to find cmd for", cmd.Command)
+			fmt.Printf("Failed to find cmd for %+v\n", cmd)
 			return false
 		}
 		returnVal = cmdFunc(ctx, cmd)
 	}
 	encodedVal := returnVal.Encoder(returnVal.EncoderArgs)
-	fmt.Printf("%s %s %b", encodedVal, cmd.Command, ctx.State.IsReplica())
 	if len(encodedVal) > 0 {
 		if IsWriteCommand(cmd.Command) && ctx.State.IsReplica() {
 			// do nothing

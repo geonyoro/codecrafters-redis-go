@@ -11,9 +11,13 @@ func main() {
 	globalState := NewState()
 	args := ParseCliArgs(os.Args[1:])
 	globalState.updateWithCliArgs(args)
-	err := SetupReplication(globalState)
+	masterConn, err := SetupReplication(globalState)
 	if err != nil {
 		panic(err)
+	}
+
+	if globalState.IsReplica() {
+		go handleConn(*masterConn, globalState, true)
 	}
 
 	l, err := net.Listen("tcp4", fmt.Sprintf("%s:%d", args.Host, args.Port))
@@ -29,37 +33,40 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			continue
 		}
-		go handleConn(conn, globalState)
+		go handleConn(conn, globalState, false)
 	}
 }
 
-func handleConn(conn net.Conn, globalState *State) {
+func handleConn(conn net.Conn, globalState *State, inMasterConn bool) {
 	defer conn.Close()
 	connState := NewConnState()
 
+	buffer := make([]byte, 1024)
 	for {
-		buffer := make([]byte, 1024)
 		readSize, err := conn.Read(buffer)
 		if err != nil || readSize == 0 {
 			break
 		}
-		command, err := ParseInput(string(buffer))
+		commands, err := ParseInput(buffer[:readSize])
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
+		for _, command := range commands {
+			fmt.Printf("%v inMasterConn:%t %+v %s\n", command, inMasterConn, globalState.VariableMap, buffer)
 
-		if IsWriteCommand(command.Command) && len(globalState.Settings.Replicas) > 0 {
-			for _, replica := range globalState.Settings.Replicas {
-				(*replica).Write(buffer[:readSize])
+			if IsWriteCommand(command.Command) && len(globalState.Settings.Replicas) > 0 {
+				for _, replica := range globalState.Settings.Replicas {
+					(*replica).Write(buffer[:readSize])
+				}
 			}
-		}
 
-		ctx := Context{
-			Conn:      conn,
-			ConnState: connState,
-			State:     globalState,
+			ctx := Context{
+				Conn:      conn,
+				ConnState: connState,
+				State:     globalState,
+			}
+			ExecuteCommand(&ctx, command)
 		}
-		ExecuteCommand(&ctx, command)
 	}
 }

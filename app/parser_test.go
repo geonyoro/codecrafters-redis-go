@@ -7,12 +7,21 @@ import (
 )
 
 func TestParseInput(t *testing.T) {
-	output, err := ParseInput("*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n")
+	output, err := ParseInput([]byte("*2\r\n$4\r\nECHO\r\n$3\r\nhey\r\n*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$3\r\n123\r\n"))
 	assert.Nil(t, err)
-	assert.Equal(t, output, Command{
-		Command: "ECHO",
-		Args: []string{
-			"hey",
+	assert.Equal(t, output, []Command{
+		{
+			Command: "ECHO",
+			Args: []string{
+				"hey",
+			},
+		},
+		{
+			Command: "SET",
+			Args: []string{
+				"foo",
+				"123",
+			},
 		},
 	})
 }

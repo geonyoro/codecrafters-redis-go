@@ -10,39 +10,42 @@ import (
 
 var InvalidReplica = errors.New("invalid replica")
 
-func SetupReplication(globalState *State) error {
+func SetupReplication(globalState *State) (conn *net.Conn, err error) {
 	if globalState.Settings.ReplicaOf == "" {
-		return nil
+		return
 	}
 
 	parts := strings.Split(globalState.Settings.ReplicaOf, " ")
 	if len(parts) != 2 {
-		return InvalidReplica
+		err = InvalidReplica
+		return
 	}
 	host := parts[0]
 	port := parts[1]
 
-	conn, err := Connect(host, port)
+	var c net.Conn
+	c, err = Connect(host, port)
+	conn = &c
 	if err != nil {
-		return err
+		return
 	}
 
-	err = ReplPing(conn)
+	err = ReplPing(c)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = ReplConf(conn, globalState)
+	err = ReplConf(c, globalState)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = ReplPsync(conn, globalState)
+	err = ReplPsync(c, globalState)
 	if err != nil {
-		return err
+		return
 	}
-
-	return nil
+	fmt.Print("SetupReplication finished.\n")
+	return
 }
 
 func Connect(host, port string) (net.Conn, error) {
@@ -62,6 +65,7 @@ func ReplPing(conn net.Conn) error {
 	if err != nil {
 		return err
 	}
+	fmt.Print("Ping command finished.\n")
 	return nil
 }
 
@@ -92,6 +96,7 @@ func ReplConfPort(conn net.Conn, globalState *State) error {
 	if err != nil {
 		return err
 	}
+	fmt.Print("ReplConfPort finished.\n")
 	return nil
 }
 
@@ -107,6 +112,7 @@ func ReplConfCapa(conn net.Conn, globalState *State) error {
 	if err != nil {
 		return err
 	}
+	fmt.Print("ReplConfCapa finished.\n")
 	return nil
 }
 
@@ -122,6 +128,7 @@ func ReplPsync(conn net.Conn, globalState *State) error {
 	if err != nil {
 		return err
 	}
+	fmt.Print("ReplPsync finished.\n")
 	return nil
 }
 
