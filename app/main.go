@@ -53,7 +53,7 @@ func handleConn(conn net.Conn, globalState *State, inMasterConn bool) {
 			continue
 		}
 		for _, command := range commands {
-			fmt.Printf("%v inMasterConn:%t %+v %s\n", command, inMasterConn, globalState.VariableMap, buffer)
+			// fmt.Printf("%v inMasterConn:%t %+v %s\n", command, inMasterConn, globalState.VariableMap, buffer)
 
 			if IsWriteCommand(command.Command) && len(globalState.Settings.Replicas) > 0 {
 				for _, replica := range globalState.Settings.Replicas {

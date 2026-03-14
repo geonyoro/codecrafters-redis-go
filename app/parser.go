@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -22,9 +21,7 @@ func ParseInput(inputb []byte) ([]Command, error) {
 			break
 		}
 		// we expect many arrays
-		fmt.Printf("IDX:%d PC:%d\n", idx, partCount-1)
 		argCountString := parts[idx]
-		fmt.Printf("Part: %s,", parts[idx])
 		argCountString = strings.TrimLeft(argCountString, "*")
 		argCount, err := strconv.Atoi(argCountString)
 		if err != nil {
@@ -45,7 +42,6 @@ func ParseInput(inputb []byte) ([]Command, error) {
 			args = append(args, arg)
 		}
 		idx = idx + argCount*2 + 1
-		fmt.Printf("cmd: %s args: %+v\n", command, args)
 		commands = append(commands, Command{
 			Command: command,
 			Args:    args,
